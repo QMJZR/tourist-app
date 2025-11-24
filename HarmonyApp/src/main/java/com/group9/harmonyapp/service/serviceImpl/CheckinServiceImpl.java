@@ -71,15 +71,13 @@ public class CheckinServiceImpl implements CheckinService {
         int distance = GeoUtil.distance(req.getLatitude(), req.getLongitude(),
                 spot.getLatitude(), spot.getLongitude());
         if (distance > spot.getRadius()) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("distance", distance);
             return Response.buildFailure("未在打卡范围内，请靠近后重试", 3101);
         }
 
         if (req.getImage() != null && !req.getImage().startsWith("data:image")) {
             return Response.buildFailure("图片格式不正确", 3103);
         }
-        
+
 //        String imageUrl = "uploaded_path.jpg";
 
         CheckinRecord record = new CheckinRecord();
