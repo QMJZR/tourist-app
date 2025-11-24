@@ -29,7 +29,7 @@ public class TokenUtil {
     @Autowired
     UserRepository userRepository;
 
-    public String getToken(User user) {
+    public static String getToken(User user) {
         Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
         return JWT.create()
                 .withAudience(String.valueOf(user.getId()))

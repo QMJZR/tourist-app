@@ -1,4 +1,4 @@
-package com.group9.harmonyapp.vo;
+package com.group9.harmonyapp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,17 +13,17 @@ import java.io.Serializable;
 @Setter
 public class Response<T> implements Serializable {
 
-    private String code;
+    private Integer code;
 
     private String msg;
 
     private T data;
 
     public static <T> Response<T> buildSuccess(T result) {
-        return new Response<T>("200", null, result);
+        return new Response<T>(200, null, result);
     }
 
-    public static <T> Response<T> buildFailure(String msg, String code) {
+    public static <T> Response<T> buildFailure(String msg, Integer code) {
         return new Response<T>(code, msg, null);
     }
 }
