@@ -17,18 +17,18 @@ public class UserController {
 
     @PostMapping("/register")
     public Response<TokenDTO> register(@RequestBody RegisterDTO dto) {
-        return authService.register(dto);
+        return Response.buildSuccess(authService.register(dto),"注册成功");
     }
 
 
     @PostMapping("/login")
     public Response<TokenDTO> login(@RequestBody LoginDTO dto) {
-        return authService.login(dto);
+        return Response.buildSuccess(authService.login(dto));
     }
 
 
     @GetMapping("/profile")
     public Response<UserProfileVO> profile(@RequestParam Long userId) {
-        return authService.getProfile(userId);
+        return Response.buildSuccess(authService.getProfile(userId));
     }
 }

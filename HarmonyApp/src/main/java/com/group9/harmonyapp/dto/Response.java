@@ -20,7 +20,10 @@ public class Response<T> implements Serializable {
     private T data;
 
     public static <T> Response<T> buildSuccess(T result) {
-        return new Response<>(200, null, result);
+        return new Response<>(200, "success", result);
+    }
+    public static <T> Response<T> buildSuccess(T result, String msg) {
+        return new Response<>(200, msg, result);
     }
 
     public static <T> Response<T> buildFailure(String msg, Integer code) {

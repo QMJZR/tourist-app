@@ -27,14 +27,11 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/favicon.ico")
-                .excludePathPatterns("/api/accounts")
-                .excludePathPatterns("/api/images")
-                .excludePathPatterns("/api/accounts/login")
-                .excludePathPatterns("/api/orders/notify")
-                .excludePathPatterns("/payment/alipay/**")
-                .excludePathPatterns("/api/cart/checkout")
+                .excludePathPatterns("/api/v1/auth/*")
+                .excludePathPatterns("/api/v1/zones")
+                .excludePathPatterns("/api/v1/spots")
+                .excludePathPatterns("/api/v1/spots/*")
                 .excludePathPatterns("/error")
-                .excludePathPatterns("/AlipayResult")
                 .order(1);
     }
 

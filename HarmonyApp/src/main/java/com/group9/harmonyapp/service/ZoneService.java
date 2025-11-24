@@ -8,5 +8,5 @@ import java.util.List;
 
 @Service
 public interface ZoneService {
-    Response<List<Zone>> getAllZones();
+    List<Zone> getAllZones();
 }

@@ -1,6 +1,6 @@
 package com.group9.harmonyapp.service.serviceImpl;
 
-import com.group9.harmonyapp.dto.Response;
+import com.group9.harmonyapp.exception.HarmonyException;
 import com.group9.harmonyapp.po.Zone;
 import com.group9.harmonyapp.repository.ZoneRepository;
 import com.group9.harmonyapp.service.ZoneService;
@@ -15,11 +15,11 @@ public class ZoneServiceImpl implements ZoneService {
     private final ZoneRepository zoneRepository;
 
 
-    public Response<List<Zone>> getAllZones() {
+    public List<Zone> getAllZones() {
         try {
-            return Response.buildSuccess(zoneRepository.findAll());
+            return zoneRepository.findAll();
         } catch (Exception e) {
-            return Response.buildFailure("获取引领区信息失败",2001);
+            throw new HarmonyException("获取引领区信息失败",2001);
         }
     }
 }

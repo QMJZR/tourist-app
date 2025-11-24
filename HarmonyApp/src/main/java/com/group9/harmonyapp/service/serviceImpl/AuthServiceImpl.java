@@ -1,5 +1,6 @@
 package com.group9.harmonyapp.service.serviceImpl;
 import com.group9.harmonyapp.dto.*;
+import com.group9.harmonyapp.exception.HarmonyException;
 import com.group9.harmonyapp.po.User;
 import com.group9.harmonyapp.repository.UserRepository;
 import com.group9.harmonyapp.service.AuthService;
@@ -17,14 +18,15 @@ public class AuthServiceImpl implements AuthService {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
 
-    public Response<TokenDTO> register(RegisterDTO dto) {
+    public TokenDTO register(RegisterDTO dto) {
         if (dto.getPassword().length() < 6) {
-            return Response.buildFailure("密码必须至少6位",1002);
+            throw new HarmonyException("密码必须至少6位",1002);
         }
-
-
+        if(dto.getEmail().length() < 6||!dto.getEmail().contains("@")){
+            throw new HarmonyException("参数校验失败,邮箱格式不正确",1000);
+        }
         if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
-            return Response.buildFailure("用户名已被注册",1001);
+            throw  new HarmonyException("用户名已被注册",1001);
         }
 
 
@@ -41,28 +43,28 @@ public class AuthServiceImpl implements AuthService {
         String token = TokenUtil.getToken(user);
 
 
-        return Response.buildSuccess(new TokenDTO(user.getId(), token, 7200));
+        return new TokenDTO(user.getId(), token, 7200);
     }
 
 
-    public Response<TokenDTO> login(LoginDTO dto) {
+    public TokenDTO login(LoginDTO dto) {
         User user = userRepository.findByUsername(dto.getUsername()).orElse(null);
-        if (user == null) return Response.buildFailure("账号不存在",1101);
+        if (user == null) throw new HarmonyException("账号不存在",1101);
 
 
         if (!encoder.matches(dto.getPassword(), user.getPassword())) {
-            return Response.buildFailure("密码错误",1102);
+            throw new HarmonyException("密码错误",1102);
         }
 
 
         String token = TokenUtil.getToken(user);
-        return Response.buildSuccess(new TokenDTO(user.getId(), token, 7200));
+        return new TokenDTO(user.getId(), token, 7200);
     }
 
 
-    public Response<UserProfileVO> getProfile(Long userId) {
+    public UserProfileVO getProfile(Long userId) {
         User u = userRepository.findById(userId).orElse(null);
-        if (u == null) return Response.buildFailure( "用户不存在",404);
+        if (u == null) throw new HarmonyException( "用户不存在",404);
 
 
         UserProfileVO vo = new UserProfileVO();
@@ -73,6 +75,9 @@ public class AuthServiceImpl implements AuthService {
         vo.setCheckinCount(u.getCheckinCount());
         vo.setIsMerchant(u.getIsMerchant());
 
-        return Response.buildSuccess(vo);
+        return vo;
+    }
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
     }
 }

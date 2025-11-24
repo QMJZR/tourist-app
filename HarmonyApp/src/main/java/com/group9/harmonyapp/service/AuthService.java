@@ -1,9 +1,11 @@
 package com.group9.harmonyapp.service;
 
 import com.group9.harmonyapp.dto.*;
+import com.group9.harmonyapp.po.User;
 
 public interface AuthService {
-    Response<TokenDTO> register(RegisterDTO dto);
-    Response<TokenDTO> login(LoginDTO dto);
-    Response<UserProfileVO> getProfile(Long userId);
+    TokenDTO register(RegisterDTO dto);
+    TokenDTO login(LoginDTO dto);
+    UserProfileVO getProfile(Long userId);
+    User getUserById(Long id);
 }

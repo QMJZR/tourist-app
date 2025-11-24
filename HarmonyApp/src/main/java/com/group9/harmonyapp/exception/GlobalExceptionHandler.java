@@ -10,6 +10,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = HarmonyException.class)
     public Response<String> handleAIExternalException(HarmonyException e) {
         e.printStackTrace();
-        return Response.buildFailure(e.getMessage(),Integer.valueOf(e.code));
+        return Response.buildFailure(e.getMessage(), e.code);
     }
 }
