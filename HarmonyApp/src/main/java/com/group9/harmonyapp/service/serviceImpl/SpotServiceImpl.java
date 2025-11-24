@@ -6,6 +6,7 @@ import com.group9.harmonyapp.exception.HarmonyException;
 import com.group9.harmonyapp.repository.SpotRepository;
 import com.group9.harmonyapp.po.Spot;
 import com.group9.harmonyapp.service.SpotService;
+import com.group9.harmonyapp.util.GeoUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -21,7 +22,6 @@ public class SpotServiceImpl implements SpotService {
 
 
     private final SpotRepository spotRepository;
-
 
     public PageResponseDTO<SpotListItemDTO> list(Long zoneId, String type, String keyword, int page, int pageSize) {
         try {
@@ -57,5 +57,10 @@ public class SpotServiceImpl implements SpotService {
         } catch (Exception e) {
             throw  new HarmonyException( "获取景点详情失败",2202);
         }
+    }
+
+    @Override
+    public List<Spot> findNearby(Double lat, Double lng, Integer radius) {
+        return spotRepository.findAll().stream().filter((e)-> GeoUtil.distance(e.getLatitude(),e.getLongitude(),lat,lng)<=radius).collect(Collectors.toList());
     }
 }

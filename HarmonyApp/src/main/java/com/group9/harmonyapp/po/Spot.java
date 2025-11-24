@@ -1,4 +1,5 @@
 package com.group9.harmonyapp.po;
+import com.group9.harmonyapp.dto.RecommendationDTO;
 import com.group9.harmonyapp.dto.SpotDetailResponse;
 import com.group9.harmonyapp.dto.SpotListItemDTO;
 import jakarta.persistence.*;
@@ -51,5 +52,16 @@ public class Spot {
         response.setImages(images);
         response.setType(type);
         return response;
+    }
+    public RecommendationDTO toRecommendationDTO(int distance) {
+        RecommendationDTO dto = new RecommendationDTO();
+        dto.setId(id);
+        dto.setName(name);
+        dto.setDistance(distance);
+        dto.setLatitude(latitude);
+        dto.setLongitude(longitude);
+        dto.setType(type);
+        return dto;
+
     }
 }

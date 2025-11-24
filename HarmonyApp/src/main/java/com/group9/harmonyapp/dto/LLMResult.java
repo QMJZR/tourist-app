@@ -3,10 +3,9 @@ package com.group9.harmonyapp.dto;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
-public class AssistantResponseDTO {
+public class LLMResult {
     private String answer;
-    private List<RecommendationDTO> recommendations;
+    private List<Long> ids;
 }
