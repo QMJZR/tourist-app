@@ -1,6 +1,4 @@
 package com.group9.harmonyapp.dto;
-
-import com.group9.harmonyapp.po.User;
 import lombok.Data;
 
 @Data

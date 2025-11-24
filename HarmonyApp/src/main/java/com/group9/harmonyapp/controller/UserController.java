@@ -1,7 +1,6 @@
 package com.group9.harmonyapp.controller;
 
-import com.group9.harmonyapp.dto.LoginDTO;
-import com.group9.harmonyapp.dto.RegisterDTO;
+import com.group9.harmonyapp.dto.*;
 import com.group9.harmonyapp.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,19 +16,19 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public Object register(@RequestBody RegisterDTO dto) {
+    public Response<TokenDTO> register(@RequestBody RegisterDTO dto) {
         return authService.register(dto);
     }
 
 
     @PostMapping("/login")
-    public Object login(@RequestBody LoginDTO dto) {
+    public Response<TokenDTO> login(@RequestBody LoginDTO dto) {
         return authService.login(dto);
     }
 
 
     @GetMapping("/profile")
-    public Object profile(@RequestParam Long userId) {
+    public Response<UserProfileVO> profile(@RequestParam Long userId) {
         return authService.getProfile(userId);
     }
 }
