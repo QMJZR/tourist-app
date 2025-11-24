@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.promising</groupId>
-    <artifactId>TomatoesBookStore</artifactId>
+    <artifactId>HarmonyApp</artifactId>
     <version>1.0.1-SNAPSHOT</version>
-    <name>TomatoesBookStore</name>
-    <description>TomatoesBookStore</description>
+    <name>HarmonyApp</name>
+    <description>HarmonyApp Backend</description>
     <url/>
     <licenses>
         <license/>
