@@ -1,13 +1,17 @@
 package com.group9.harmonyapp.service.serviceImpl;
 import com.group9.harmonyapp.dto.*;
 import com.group9.harmonyapp.exception.HarmonyException;
+import com.group9.harmonyapp.po.CheckinRecord;
 import com.group9.harmonyapp.po.User;
 import com.group9.harmonyapp.repository.UserRepository;
 import com.group9.harmonyapp.service.AuthService;
+import com.group9.harmonyapp.service.CheckinService;
 import com.group9.harmonyapp.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +19,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     private final UserRepository userRepository;
+    private final CheckinService checkinService;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
 
@@ -74,7 +79,8 @@ public class AuthServiceImpl implements AuthService {
         vo.setPoints(u.getPoints());
         vo.setCheckinCount(u.getCheckinCount());
         vo.setIsMerchant(u.getIsMerchant());
-
+        vo.setCheckinSpotIds(checkinService.getCheckinSpotsByUser(u.getId()).stream().map(CheckinRecord::getSpotId).distinct().collect(Collectors.toList()));
+        vo.setEmail(u.getEmail());
         return vo;
     }
     public User getUserById(Long userId) {

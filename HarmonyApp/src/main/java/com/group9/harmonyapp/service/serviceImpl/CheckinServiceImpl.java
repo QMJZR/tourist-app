@@ -98,4 +98,8 @@ public class CheckinServiceImpl implements CheckinService {
 
         return dto;
     }
+    @Override
+    public List<CheckinRecord> getCheckinSpotsByUser(Long userId){
+        return checkinRecordRepository.findByUserId(userId);
+    }
 }
