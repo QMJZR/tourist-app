@@ -1,23 +1,20 @@
 package com.group9.harmonyapp.po;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "feed_likes", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"feedId", "userId"})
-})
 @Data
-public class FeedLike {
-
+public class PointRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long feedId;
-
     private Long userId;
-
+    private String type; // earn 或 spend
+    private String source;
+    private Integer points;
     private LocalDateTime createdAt;
 }
