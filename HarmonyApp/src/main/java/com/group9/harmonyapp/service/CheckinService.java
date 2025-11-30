@@ -11,4 +11,5 @@ public interface CheckinService {
     CheckinResultDTO submitCheckin(Long userId, CheckinSubmitRequest req);
 
     List<CheckinRecord> getCheckinSpotsByUser(Long userId);
+    com.group9.harmonyapp.dto.PageResponseDTO<com.group9.harmonyapp.dto.CheckinRecordDTO> getUserCheckins(Long userId, int page, int pageSize);
 }

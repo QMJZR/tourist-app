@@ -21,9 +21,13 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
     @Autowired
     LoginInterceptor loginInterceptor;
 
+    @Autowired
+    AdminInterceptor adminInterceptor;
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
+        // 普通用户拦截器，排除管理端路径
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/favicon.ico")
@@ -31,7 +35,14 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/v1/zones")
                 .excludePathPatterns("/api/v1/spots")
                 .excludePathPatterns("/api/v1/spots/*")
+                .excludePathPatterns("/admin/**")
                 .excludePathPatterns("/error")
+                .order(2);
+
+        // 管理端拦截器，仅作用于 /admin/**，排除 /admin/auth/**
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/admin/**")
+                .excludePathPatterns("/admin/auth/**")
                 .order(1);
     }
 
