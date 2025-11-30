@@ -18,11 +18,25 @@ export const logout = () => {
 // ----------------------
 // 用户管理
 // ----------------------
-export const getUserList = () => {
-    return axios.get('/api/admin/users')
+export const getUserList = (params?: {
+    keyword?: string
+    isMerchant?: string
+    page?: number
+    pageSize?: number
+}) => {
+    return axios.get('/api/admin/users', { params })
 }
 
-export const updateUser = (userId: number, data: any) => {
+export const getUserById = (userId: number) => {
+    return axios.get(`/api/admin/users/${userId}`)
+}
+
+export const updateUser = (userId: number, data: {
+    nickname?: string
+    avatar?: string
+    points?: number
+    isMerchant?: string
+}) => {
     return axios.put(`/api/admin/users/${userId}`, data)
 }
 
@@ -115,8 +129,11 @@ export const getUserPointLogs = (userId: number, params?: {
 // ----------------------
 // 礼品管理
 // ----------------------
-export const getGifts = () => {
-    return axios.get('/api/admin/gifts')
+export const getGifts = (params?: {
+    status?: string
+    keyword?: string
+}) => {
+    return axios.get('/api/admin/gifts', { params })
 }
 
 export const createGift = (data: any) => {
@@ -129,4 +146,17 @@ export const updateGift = (giftId: number, data: any) => {
 
 export const deleteGift = (giftId: number) => {
     return axios.delete(`/api/admin/gifts/${giftId}`)
+}
+
+// 调整礼品库存
+export const updateGiftStock = (giftId: number, stock: number) => {
+    return axios.patch(`/api/admin/gifts/${giftId}/stock`, { stock })
+}
+
+// 获取礼品兑换记录
+export const getGiftRedeems = (giftId: number, params?: {
+    startDate?: string
+    endDate?: string
+}) => {
+    return axios.get(`/api/admin/gifts/${giftId}/redeems`, { params })
 }
