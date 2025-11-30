@@ -86,4 +86,36 @@ public class AuthServiceImpl implements AuthService {
     public User getUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
+
+    @Override
+    public UserProfileVO updateProfile(Long userId, com.group9.harmonyapp.dto.UpdateProfileDTO dto) {
+        User u = userRepository.findById(userId).orElse(null);
+        if (u == null) throw new HarmonyException("用户不存在",404);
+
+        if (dto.getNickname() != null) {
+            if (dto.getNickname().length() > 20) {
+                throw new HarmonyException("昵称长度不能超过20字符",1301);
+            }
+            u.setNickname(dto.getNickname());
+        }
+
+        if (dto.getAvatar() != null) {
+            // 简单校验：长度限制（可按需扩展）
+            if (dto.getAvatar().length() > 1024) {
+                throw new HarmonyException("头像地址长度超出限制",1301);
+            }
+            u.setAvatar(dto.getAvatar());
+        }
+
+        if (dto.getEmail() != null) {
+            if (dto.getEmail().length() < 6 || !dto.getEmail().contains("@")) {
+                throw new HarmonyException("参数校验失败,邮箱格式不正确",1000);
+            }
+            u.setEmail(dto.getEmail());
+        }
+
+        userRepository.save(u);
+
+        return getProfile(u.getId());
+    }
 }

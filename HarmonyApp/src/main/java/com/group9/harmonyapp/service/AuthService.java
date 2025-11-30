@@ -8,4 +8,5 @@ public interface AuthService {
     TokenDTO login(LoginDTO dto);
     UserProfileVO getProfile(Long userId);
     User getUserById(Long id);
+    com.group9.harmonyapp.dto.UserProfileVO updateProfile(Long userId, com.group9.harmonyapp.dto.UpdateProfileDTO dto);
 }
