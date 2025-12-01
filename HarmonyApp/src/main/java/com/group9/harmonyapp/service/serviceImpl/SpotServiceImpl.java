@@ -25,22 +25,29 @@ public class SpotServiceImpl implements SpotService {
 
     public PageResponseDTO<SpotListItemDTO> list(Long zoneId, String type, String keyword, int page, int pageSize) {
         try {
-            Pageable pageable = PageRequest.of(page - 1, pageSize);
-
-
-            Page<Spot> result = spotRepository.findAll((root, query, cb) -> {
+            // 不使用分页直接查询所有符合条件的数据（便于后续排序和分页）
+            List<Spot> allSpots = spotRepository.findAll((root, query, cb) -> {
                 List<Predicate> predicates = new java.util.ArrayList<>();
                 if (zoneId != null) predicates.add(cb.equal(root.get("zoneId"), zoneId));
                 if (type != null) predicates.add(cb.equal(root.get("type"), type));
                 if (keyword != null) predicates.add(cb.like(root.get("name"), "%" + keyword + "%"));
                 return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-            }, pageable);
+            });
+
+            // 转换为 DTO（此时不计算距离）
+            List<SpotListItemDTO> dtoList = allSpots.stream().map(Spot::toSpotListItemDTO).collect(Collectors.toList());
+
+            // 应用分页
+            int total = dtoList.size();
+            int from = Math.max(0, (page - 1) * pageSize);
+            int to = Math.min(total, from + pageSize);
+            List<SpotListItemDTO> pageList = dtoList.subList(from, to);
 
             PageResponseDTO<SpotListItemDTO> data = new PageResponseDTO<>();
-            data.setList(result.getContent().stream().map(Spot::toSpotListItemDTO).collect(Collectors.toList()));
+            data.setList(pageList);
             data.setPage(page);
             data.setPageSize(pageSize);
-            data.setTotal(result.getTotalElements());
+            data.setTotal(total);
 
             return data;
         } catch (Exception e) {

@@ -103,4 +103,37 @@ public class CheckinServiceImpl implements CheckinService {
     public List<CheckinRecord> getCheckinSpotsByUser(Long userId){
         return checkinRecordRepository.findByUserId(userId);
     }
+
+    @Override
+    public com.group9.harmonyapp.dto.PageResponseDTO<com.group9.harmonyapp.dto.CheckinRecordDTO> getUserCheckins(Long userId, int page, int pageSize) {
+        try {
+            List<com.group9.harmonyapp.po.CheckinRecord> records = checkinRecordRepository.findByUserId(userId);
+
+            // 按时间降序
+            records.sort((a, b) -> b.getCreateTime().compareTo(a.getCreateTime()));
+
+            List<com.group9.harmonyapp.dto.CheckinRecordDTO> list = records.stream().map(r -> {
+                com.group9.harmonyapp.dto.CheckinRecordDTO dto = new com.group9.harmonyapp.dto.CheckinRecordDTO();
+                dto.setCheckinId(r.getId());
+                dto.setSpotId(r.getSpotId());
+                com.group9.harmonyapp.po.Spot spot = spotRepository.findById(r.getSpotId()).orElse(null);
+                if (spot != null) {
+                    dto.setSpotName(spot.getName());
+                    dto.setImages(spot.getImages());
+                }
+                dto.setPointsEarned(100);
+                dto.setCreatedAt(r.getCreateTime());
+                return dto;
+            }).toList();
+
+            int total = list.size();
+            int from = Math.max(0, (page - 1) * pageSize);
+            int to = Math.min(total, from + pageSize);
+            List<com.group9.harmonyapp.dto.CheckinRecordDTO> pageList = list.subList(from, to);
+
+            return new com.group9.harmonyapp.dto.PageResponseDTO<>(pageList, page, pageSize, total);
+        } catch (Exception e) {
+            throw new com.group9.harmonyapp.exception.HarmonyException("获取打卡记录失败", 3701);
+        }
+    }
 }

@@ -1,0 +1,20 @@
+package com.group9.harmonyapp.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+public class AdminGiftRedeemResultDTO {
+    private Long redeemId;
+    private Long userId;
+    private String username;
+    private Long giftId;
+    private Integer pointsUsed;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'")
+    private LocalDateTime redeemTime;
+    
+    private String status;
+}
