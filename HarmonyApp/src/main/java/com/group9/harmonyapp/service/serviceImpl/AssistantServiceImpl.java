@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AssistantServiceImpl implements AssistantService {
 
-        private DeepSeekService deepSeekService;
-        private SpotService spotService;
-        private SpotRepository spotRepository;
+        private final DeepSeekService deepSeekService;
+        private final SpotService spotService;
+        private final SpotRepository spotRepository;
         public AssistantResponseDTO handleAsk(AssistantRequestDTO req) {
             try{
             // 参数校验

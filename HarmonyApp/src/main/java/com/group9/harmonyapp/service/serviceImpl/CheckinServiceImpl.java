@@ -9,6 +9,7 @@ import com.group9.harmonyapp.repository.SpotRepository;
 import com.group9.harmonyapp.service.CheckinService;
 import com.group9.harmonyapp.util.GeoUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
