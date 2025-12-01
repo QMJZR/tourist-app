@@ -5,6 +5,7 @@ import com.group9.harmonyapp.po.Zone;
 import com.group9.harmonyapp.repository.ZoneRepository;
 import com.group9.harmonyapp.service.ZoneService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,7 +15,8 @@ import java.util.List;
 public class ZoneServiceImpl implements ZoneService {
     private final ZoneRepository zoneRepository;
 
-
+    @Override
+    @Cacheable(value = "zoneCache", key = "'allZones'")
     public List<Zone> getAllZones() {
         try {
             return zoneRepository.findAll();

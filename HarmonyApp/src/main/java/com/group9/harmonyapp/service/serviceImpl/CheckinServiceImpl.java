@@ -9,7 +9,8 @@ import com.group9.harmonyapp.repository.SpotRepository;
 import com.group9.harmonyapp.service.CheckinService;
 import com.group9.harmonyapp.util.GeoUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -23,9 +24,16 @@ public class CheckinServiceImpl implements CheckinService {
     private final SpotRepository spotRepository;
     private final CheckinRecordRepository checkinRecordRepository;
 
+    /**
+     * 缓存景点列表
+     * key：lat_lng_sort
+     */
+    @Cacheable(
+            cacheNames = "spots:list",
+            key = "'spots_' + #lat + '_' + #lng + '_' + #sort"
+    )
     @Override
     public List<SpotCheckinInfoDTO> listSpots(Double lat, Double lng, String sort) {
-
         try {
             List<Spot> spots = spotRepository.findAll();
 
@@ -56,6 +64,15 @@ public class CheckinServiceImpl implements CheckinService {
         }
     }
 
+    /**
+     * 提交打卡，必须清除缓存：
+     * - 用户打卡记录缓存
+     * - 用户打卡分页缓存
+     */
+    @CacheEvict(value = {
+            "user:checkins",
+            "user:checkins:page"
+    }, key = "#userId", allEntries = true)
     @Override
     public CheckinResultDTO submitCheckin(Long userId, CheckinSubmitRequest req) {
 
@@ -63,15 +80,19 @@ public class CheckinServiceImpl implements CheckinService {
         if (spot == null) {
             throw new HarmonyException("打卡点不存在", 3104);
         }
+
         LocalDate today = LocalDate.now();
         Optional<CheckinRecord> exists =
                 checkinRecordRepository.findByUserIdAndSpotIdAndDate(userId, req.getSpotId(), today);
+
         if (exists.isPresent()) {
             throw new HarmonyException("今日已打卡，请明天再来", 3102);
         }
 
-        int distance = GeoUtil.distance(req.getLatitude(), req.getLongitude(),
-                spot.getLatitude(), spot.getLongitude());
+        int distance = GeoUtil.distance(
+                req.getLatitude(), req.getLongitude(),
+                spot.getLatitude(), spot.getLongitude()
+        );
         if (distance > spot.getRadius()) {
             throw new HarmonyException("未在打卡范围内，请靠近后重试", 3101);
         }
@@ -79,8 +100,6 @@ public class CheckinServiceImpl implements CheckinService {
         if (req.getImage() != null && !req.getImage().startsWith("data:image")) {
             throw new HarmonyException("图片格式不正确", 3103);
         }
-
-//        String imageUrl = "uploaded_path.jpg";
 
         CheckinRecord record = new CheckinRecord();
         record.setUserId(userId);
@@ -99,24 +118,38 @@ public class CheckinServiceImpl implements CheckinService {
 
         return dto;
     }
+
+    /**
+     * 缓存用户打卡的所有景点 id 列表
+     */
+    @Cacheable(
+            cacheNames = "user:checkins",
+            key = "#userId"
+    )
     @Override
-    public List<CheckinRecord> getCheckinSpotsByUser(Long userId){
+    public List<CheckinRecord> getCheckinSpotsByUser(Long userId) {
         return checkinRecordRepository.findByUserId(userId);
     }
 
+    /**
+     * 用户分页打卡记录，需要带页码分页，因此 key 必须包含 page、pageSize
+     */
+    @Cacheable(
+            cacheNames = "user:checkins:page",
+            key = "#userId + '_' + #page + '_' + #pageSize"
+    )
     @Override
-    public com.group9.harmonyapp.dto.PageResponseDTO<com.group9.harmonyapp.dto.CheckinRecordDTO> getUserCheckins(Long userId, int page, int pageSize) {
+    public PageResponseDTO<CheckinRecordDTO> getUserCheckins(Long userId, int page, int pageSize) {
         try {
-            List<com.group9.harmonyapp.po.CheckinRecord> records = checkinRecordRepository.findByUserId(userId);
+            List<CheckinRecord> records = checkinRecordRepository.findByUserId(userId);
 
-            // 按时间降序
             records.sort((a, b) -> b.getCreateTime().compareTo(a.getCreateTime()));
 
-            List<com.group9.harmonyapp.dto.CheckinRecordDTO> list = records.stream().map(r -> {
-                com.group9.harmonyapp.dto.CheckinRecordDTO dto = new com.group9.harmonyapp.dto.CheckinRecordDTO();
+            List<CheckinRecordDTO> list = records.stream().map(r -> {
+                CheckinRecordDTO dto = new CheckinRecordDTO();
                 dto.setCheckinId(r.getId());
                 dto.setSpotId(r.getSpotId());
-                com.group9.harmonyapp.po.Spot spot = spotRepository.findById(r.getSpotId()).orElse(null);
+                Spot spot = spotRepository.findById(r.getSpotId()).orElse(null);
                 if (spot != null) {
                     dto.setSpotName(spot.getName());
                     dto.setImages(spot.getImages());
@@ -129,11 +162,12 @@ public class CheckinServiceImpl implements CheckinService {
             int total = list.size();
             int from = Math.max(0, (page - 1) * pageSize);
             int to = Math.min(total, from + pageSize);
-            List<com.group9.harmonyapp.dto.CheckinRecordDTO> pageList = list.subList(from, to);
 
-            return new com.group9.harmonyapp.dto.PageResponseDTO<>(pageList, page, pageSize, total);
+            List<CheckinRecordDTO> pageList = list.subList(from, to);
+
+            return new PageResponseDTO<>(pageList, page, pageSize, total);
         } catch (Exception e) {
-            throw new com.group9.harmonyapp.exception.HarmonyException("获取打卡记录失败", 3701);
+            throw new HarmonyException("获取打卡记录失败", 3701);
         }
     }
 }
