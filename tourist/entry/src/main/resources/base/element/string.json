@@ -5,6 +5,10 @@
       "value": "module description"
     },
     {
+      "name": "app_name",
+      "value": "游客"
+    },
+    {
       "name": "EntryAbility_desc",
       "value": "description"
     },

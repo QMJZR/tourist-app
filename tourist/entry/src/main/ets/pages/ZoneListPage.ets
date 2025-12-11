@@ -62,11 +62,11 @@ struct ZoneItem {
           .borderRadius(8)
       } else {
         // 默认图片 - 需要先在resources中定义
-        Image($r('app.media.default_banner'))
-          .width('100%')
-          .height(200)
-          .objectFit(ImageFit.Cover)
-          .borderRadius(8)
+        // Image($r('app.media.default_banner'))
+        //   .width('100%')
+        //   .height(200)
+        //   .objectFit(ImageFit.Cover)
+        //   .borderRadius(8)
       }
 
       // 景区信息

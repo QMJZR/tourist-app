@@ -163,19 +163,19 @@ struct SpotItem {
         .margin({ right: 10 })
     } else {
       // 如果没有缩略图，使用默认背景
-      Column() {
-        Image($r('app.media.ic_public_picture_filled')) // 使用系统图标
-          .width(30)
-          .height(30)
-          .fillColor('#999')
-      }
-      .width(80)
-      .height(80)
-      .backgroundColor('#F0F0F0')
-      .borderRadius(8)
-      .justifyContent(FlexAlign.Center)
-      .alignItems(HorizontalAlign.Center)
-      .margin({ right: 10 })
+      // Column() {
+      //   Image($r('app.media.ic_public_picture_filled')) // 使用系统图标
+      //     .width(30)
+      //     .height(30)
+      //     .fillColor('#999')
+      // }
+      // .width(80)
+      // .height(80)
+      // .backgroundColor('#F0F0F0')
+      // .borderRadius(8)
+      // .justifyContent(FlexAlign.Center)
+      // .alignItems(HorizontalAlign.Center)
+      // .margin({ right: 10 })
     }
   }
 }
