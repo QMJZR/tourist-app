@@ -1,118 +1,101 @@
-import { AuthService } from '../services/AuthService';
-import { LoginRequest } from '../models/User';
-import { Constants } from '../utils/Constants';
 import router from '@ohos.router';
-import prompt from '@ohos.promptAction';
 
 @Entry
 @Component
 struct LoginPage {
   @State username: string = '';
   @State password: string = '';
-  @State isLoading: boolean = false;
 
   build() {
-    Column() {
-      // Header
-      Text('登录')
-        .fontSize(24)
+    Column({ space: 20 }) {
+      // 应用标题
+      Text('欢迎使用')
+        .fontSize(30)
         .fontWeight(FontWeight.Bold)
-        .margin({ top: 60, bottom: 40 })
+        .fontColor('#007DFF')
+        .margin({ top: 80, bottom: 40 })
 
-      // Username Input
-      TextInput({ placeholder: '请输入用户名' })
-        .width('90%')
+      // 用户名输入框
+      TextInput({ placeholder: '用户名' })
+        .width('80%')
         .height(50)
         .backgroundColor(Color.White)
-        .borderRadius(8)
-        .padding(10)
+        .borderRadius(25)
+        .padding({ left: 20, right: 20 })
         .onChange((value: string) => {
           this.username = value;
         })
-        .margin({ bottom: 20 })
 
-      // Password Input
-      TextInput({ placeholder: '请输入密码' })
-        .width('90%')
+      // 密码输入框
+      TextInput({ placeholder: '密码' })
+        .width('80%')
         .height(50)
         .type(InputType.Password)
         .backgroundColor(Color.White)
-        .borderRadius(8)
-        .padding(10)
+        .borderRadius(25)
+        .padding({ left: 20, right: 20 })
         .onChange((value: string) => {
           this.password = value;
         })
-        .margin({ bottom: 30 })
 
-      // Login Button
-      Button('登录', { type: ButtonType.Capsule })
-        .width('90%')
+      // 登录按钮
+      Button('登录')
+        .width('80%')
         .height(50)
-        .backgroundColor('#007DFF')
+        .fontSize(18)
         .fontColor(Color.White)
-        .enabled(!this.isLoading && !!this.username && !!this.password)
+        .backgroundColor('#007DFF')
+        .borderRadius(25)
+        .enabled(!!this.username && !!this.password)
         .onClick(() => {
           this.handleLogin();
         })
-        .margin({ bottom: 20 })
+        .margin({ top: 20 })
 
-      // Register Link
-      Row() {
-        Text('还没有账号？')
-          .fontSize(14)
-          .fontColor('#666')
+      // 注册按钮
+      Button('注册账号')
+        .width('80%')
+        .height(50)
+        .fontSize(18)
+        .fontColor('#007DFF')
+        .backgroundColor(Color.White)
+        .borderRadius(25)
+        .border({
+          width: 1,
+          color: '#007DFF'
+        })
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/RegisterPage' });
+        })
 
-        Text('立即注册')
-          .fontSize(14)
-          .fontColor('#007DFF')
-          .onClick(() => {
-            router.pushUrl({ url: 'pages/RegisterPage' });
-          })
-      }
-      .margin({ top: 20 })
-
-      // Loading
-      if (this.isLoading) {
-        LoadingProgress()
-          .color('#007DFF')
-          .margin({ top: 20 })
-      }
+      // 忘记密码（可选）
+      Text('忘记密码？')
+        .fontSize(14)
+        .fontColor('#666')
+        .margin({ top: 30 })
+        .onClick(() => {
+          // 可以添加忘记密码页面跳转
+        })
     }
     .width('100%')
     .height('100%')
-    .backgroundColor('#F5F5F5')
-    .padding(20)
+    .backgroundColor('#F8F9FA')
+    .justifyContent(FlexAlign.Start)
+    .alignItems(HorizontalAlign.Center)
   }
 
-  private async handleLogin() {
-    this.isLoading = true;
+  private handleLogin() {
+    // 这里只做简单的界面跳转，不调用API
+    console.log('用户名:', this.username);
+    console.log('密码:', this.password);
 
-    const loginData: LoginRequest = {
-      username: this.username,
-      password: this.password
-    };
-
-    try {
-      const response = await AuthService.login(loginData);
-
-      if (response.code === Constants.SUCCESS_CODE) {
-        // 登录成功，跳转到主页
-        router.replaceUrl({ url: 'pages/MainPage' });
-      } else {
-        // 显示错误信息
-        this.showToast(response.message);
+    // 跳转到主页面
+    router.replaceUrl({
+      url: 'pages/MainPage',
+      params: {
+        username: this.username,
+        loginTime: new Date().toLocaleString()
       }
-    } catch (error) {
-      this.showToast('登录失败，请重试');
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  private showToast(message: string): void {
-    prompt.showToast({
-      message: message,
-      duration: 3000
     });
   }
 }
