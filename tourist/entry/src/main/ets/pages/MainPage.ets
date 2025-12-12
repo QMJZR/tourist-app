@@ -1,10 +1,12 @@
+import ProfilePage from './ProfilePage';
+
 @Entry
 @Component
 struct MainPage {
   @State currentTab: number = 0;
 
   build() {
-    Tabs() {
+    Tabs({ barPosition: BarPosition.End }) {
       TabContent() {
         // 首页 - 景区列表
         this.buildZoneListPage()
@@ -21,11 +23,11 @@ struct MainPage {
         // 动态
         this.buildFeedListPage()
       }
-      .tabBar('动态')
+      .tabBar('发现')
 
       TabContent() {
         // 个人中心
-        this.buildProfilePage()
+        ProfilePage()
       }
       .tabBar('我的')
     }
