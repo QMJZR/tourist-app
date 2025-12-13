@@ -1,4 +1,5 @@
 import ProfilePage from './ProfilePage';
+import DiscoverPage from './DiscoverPage';
 
 @Entry
 @Component
@@ -20,8 +21,8 @@ struct MainPage {
       .tabBar('打卡')
 
       TabContent() {
-        // 动态
-        this.buildFeedListPage()
+        // 发现
+        DiscoverPage()
       }
       .tabBar('发现')
 

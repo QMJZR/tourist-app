@@ -1,4 +1,6 @@
 // entry/src/main/ets/pages/ProfilePage.ets
+
+import router from '@ohos.router';
 // 用户信息接口
 import {getProfile} from "../api/user";
 
@@ -49,7 +51,7 @@ export default struct ProfilePage {
   // 其他功能项
   @State otherFunctions: FunctionItem[] = [
     { id: 'settings', icon: '⚙️', title: '设置', showArrow: true, route: 'settings' },
-    { id: 'about', icon: 'ℹ️', title: '关于我们', showArrow: true, route: 'about' }
+    { id: 'help', icon: '❓', title: '帮助', showArrow: true, route: 'assistant' }
   ];
 
   // ==================== 构建方法 ====================
@@ -316,11 +318,12 @@ export default struct ProfilePage {
       case 'settings':
         this.onSettingsClick();
         break;
-      case 'about':
-        this.onAboutClick();
+      case 'help':  // 新增case
+        this.onHelpClick();
         break;
     }
   }
+
 
   // 编辑个人信息点击 - 点击"修改个人信息"功能项时调用
   private onEditProfileClick() {
@@ -349,9 +352,24 @@ export default struct ProfilePage {
     console.log('点击设置');
   }
 
-  // 关于我们点击
-  private onAboutClick() {
-    console.log('点击关于我们');
+  // 帮助点击
+  private onHelpClick(): void {
+    console.log('点击帮助，跳转到智能问答界面');
+
+    // 明确指定类型
+    const promise: Promise<void> = router.pushUrl({
+      url: 'pages/AssistantPage',
+      params: {
+        from: 'profile',
+        timestamp: new Date().getTime()
+      }
+    });
+
+    promise.then((): void => {
+      console.log('成功跳转到助手页面');
+    }).catch((error: Error): void => {
+      console.error('跳转失败:', error.message);
+    });
   }
 
   // 退出登录点击
