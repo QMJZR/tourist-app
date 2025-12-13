@@ -1,4 +1,5 @@
 import router from '@ohos.router';
+import {login, LoginRequest, getProfile} from "../api/user";
 
 @Entry
 @Component
@@ -85,9 +86,11 @@ struct LoginPage {
   }
 
   private handleLogin() {
-    // 这里只做简单的界面跳转，不调用API
-    console.log('用户名:', this.username);
-    console.log('密码:', this.password);
+
+    const data = new LoginRequest();
+    data.username = this.username;
+    data.password = this.password;
+    login(data);
 
     // 跳转到主页面
     router.replaceUrl({
@@ -97,5 +100,8 @@ struct LoginPage {
         loginTime: new Date().toLocaleString()
       }
     });
+
+    //get profile
+   // getProfile();
   }
 }

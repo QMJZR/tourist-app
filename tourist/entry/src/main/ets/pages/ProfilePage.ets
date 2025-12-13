@@ -1,11 +1,23 @@
 // entry/src/main/ets/pages/ProfilePage.ets
 // 用户信息接口
-interface UserInfo {
+import {getProfile} from "../api/user";
+
+interface UserData {
+  userId: number;
+  username: string;
   nickname: string;
   avatar: string;
+  points: number;
+  checkinCount: number;
+  isMerchant: string;
+  checkinSpotIds: number[];  // 数组类型
   email: string;
 }
-
+interface UserInfo {
+  nickname:string;
+  avatar:string;
+  email:string;
+}
 // 功能项接口
 interface FunctionItem {
   id: string;
@@ -56,6 +68,11 @@ export default struct ProfilePage {
       // 4. 退出登录按钮
       this.buildLogoutButton()
 
+      // ======== 新增的测试按钮 ========
+      // 4. 测试获取用户资料按钮
+      this.buildTestProfileButton()
+      // ==============================
+
       // 5. 底部安全区域占位
       Row()
         .height(60)
@@ -66,6 +83,59 @@ export default struct ProfilePage {
     .backgroundColor('#F5F5F5')
   }
 
+  // ==================== 新增的构建器方法 ====================
+
+  @Builder
+  buildTestProfileButton() {
+    Column() {
+      Text('测试获取用户资料')
+        .fontSize(16)
+        .fontColor('#007AFF')
+        .fontWeight(FontWeight.Medium)
+        .textAlign(TextAlign.Center)
+        .width('100%')
+        .height(50)
+        .backgroundColor(Color.White)
+        .borderRadius(10)
+        .onClick(() => {
+          this.onTestProfileClick();
+        })
+    }
+    .margin({ left: 15, right: 15, top: 10, bottom: 10 })
+  }
+
+  // ==================== 新增的事件处理方法 ====================
+
+  // 测试获取用户资料点击
+  private onTestProfileClick() {
+    console.log('点击测试获取用户资料按钮');
+
+    // 调用 getProfile 方法
+    getProfile().then((response) => {
+      console.log("you clicked getProfile btn!");
+      console.log('获取用户资料成功:', response);
+      //   if (response) {
+      //
+      //
+      //     // 如果获取成功，更新用户信息显示
+      //     if (response.code === 200 && response.data) {
+      //       this.userInfo = {
+      //         nickname: response.data.nickname || this.userInfo.nickname,
+      //         avatar: response.data.avatar || this.userInfo.avatar,
+      //         email: response.data.email || this.userInfo.email
+      //       };
+      //       console.log('用户信息已更新');
+      //     } else {
+      //       console.log('获取用户资料失败:', response.message);
+      //     }
+      //   } else {
+      //     console.log('获取用户资料失败: 返回空响应');
+      //   }
+      // }).catch((error) => {
+      //   console.error('获取用户资料异常:', error);
+      // });
+    });
+  }
   // ==================== 顶部用户信息卡片 ====================
 
   @Builder
