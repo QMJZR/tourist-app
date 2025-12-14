@@ -5,6 +5,10 @@
     "pages/ProfilePage",
     "pages/AssistantPage",
     "pages/LoginPage",
-    "pages/RegisterPage"
+    "pages/RegisterPage",
+    "pages/ZoneListPage",
+    "pages/SpotListPage",
+    "pages/SpotDetailPage"
+
   ]
 }
