@@ -15,11 +15,13 @@ interface UserData {
   checkinSpotIds: number[];  // 数组类型
   email: string;
 }
+
 interface UserInfo {
-  nickname:string;
-  avatar:string;
-  email:string;
+  nickname: string;
+  avatar: string;
+  email: string;
 }
+
 // 功能项接口
 interface FunctionItem {
   id: string;
@@ -33,18 +35,31 @@ interface FunctionItem {
 @Entry
 @Component
 export default struct ProfilePage {
-  // 用户信息（写死假数据）
+  // 用户信息 - 初始化为假数据
   @State userInfo: UserInfo = {
     nickname: '旅行爱好者',
     avatar: 'https://avatars.githubusercontent.com/u/1?v=4',
     email: 'traveler@example.com'
   };
 
-  // 功能列表（写死假数据）
+  // 用户名 - 新增状态，用于显示用户名
+  @State username: string = '';
+
+  // 用户积分和打卡数据
+  @State userPoints: number = 0;  // 修改：默认积分设为0
+  @State userCheckinCount: number = 0;
+  @State userId: number = 0;
+
+  // 数据加载状态
+  @State isLoading: boolean = false;
+  @State isError: boolean = false;
+  @State errorMessage: string = '';
+
+  // 功能列表 - 修改：我的礼品去掉副标题
   @State functionList: FunctionItem[] = [
     { id: 'checkin', icon: '📍', title: '打卡记录', subtitle: '查看您的打卡历史', showArrow: true, route: 'checkin_history' },
-    { id: 'points', icon: '⭐', title: '积分', subtitle: '当前积分：2560', showArrow: true, route: 'points' },
-    { id: 'gifts', icon: '🎁', title: '我的礼品', subtitle: '已兑换3个礼品', showArrow: true, route: 'gifts' },
+    { id: 'points', icon: '⭐', title: '积分', subtitle: '当前积分：0', showArrow: true, route: 'points' },  // 修改：积分从0开始
+    { id: 'gifts', icon: '🎁', title: '我的礼品', showArrow: true, route: 'gifts' },  // 修改：移除副标题
     { id: 'edit', icon: '✏️', title: '修改个人信息', showArrow: true, route: 'edit_profile' }
   ];
 
@@ -58,86 +73,90 @@ export default struct ProfilePage {
 
   build() {
     Column() {
-      // 1. 顶部用户信息卡片
-      this.buildUserCard()
+      // 显示加载状态
+      if (this.isLoading) {
+        this.buildLoadingView()
+      } else {
+        // 1. 顶部用户信息卡片
+        this.buildUserCard()
 
-      // 2. 主要功能列表
-      this.buildFunctionList()
+        // 2. 主要功能列表
+        this.buildFunctionList()
 
-      // 3. 其他功能列表
-      this.buildOtherFunctions()
+        // 3. 其他功能列表
+        this.buildOtherFunctions()
 
-      // 4. 退出登录按钮
-      this.buildLogoutButton()
+        // 4. 退出登录按钮
+        this.buildLogoutButton()
 
-      // ======== 新增的测试按钮 ========
-      // 4. 测试获取用户资料按钮
-      this.buildTestProfileButton()
-      // ==============================
+        // 5. 底部安全区域占位
+        Row()
+          .height(60)
+          .width('100%')
+      }
 
-      // 5. 底部安全区域占位
-      Row()
-        .height(60)
-        .width('100%')
+      // 显示错误信息
+      if (this.isError) {
+        this.buildErrorView()
+      }
     }
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F5F5')
   }
 
-  // ==================== 新增的构建器方法 ====================
+  // ==================== 新增构建器方法 ====================
 
+  // 加载视图
   @Builder
-  buildTestProfileButton() {
+  buildLoadingView() {
     Column() {
-      Text('测试获取用户资料')
+      LoadingProgress()
+        .width(40)
+        .height(40)
+        .color('#007AFF')
+
+      Text('正在加载用户信息...')
         .fontSize(16)
-        .fontColor('#007AFF')
-        .fontWeight(FontWeight.Medium)
-        .textAlign(TextAlign.Center)
-        .width('100%')
-        .height(50)
-        .backgroundColor(Color.White)
-        .borderRadius(10)
+        .fontColor('#666666')
+        .margin({ top: 16 })
+    }
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+  }
+
+  // 错误视图
+  @Builder
+  buildErrorView() {
+    Column() {
+      Text('加载失败')
+        .fontSize(16)
+        .fontColor('#FF3B30')
+        .margin({ bottom: 8 })
+
+      Text(this.errorMessage)
+        .fontSize(14)
+        .fontColor('#666666')
+        .margin({ bottom: 16 })
+
+      Button('重试')
+        .backgroundColor('#007AFF')
+        .fontColor(Color.White)
+        .fontSize(14)
+        .width(120)
+        .height(36)
         .onClick(() => {
-          this.onTestProfileClick();
+          this.loadUserInfo();
         })
     }
-    .margin({ left: 15, right: 15, top: 10, bottom: 10 })
+    .width('100%')
+    .padding(20)
+    .backgroundColor('#FFF3F3')
+    .borderRadius(12)
+    .margin({ top: 10, bottom: 10, left: 15, right: 15 })
   }
 
-  // ==================== 新增的事件处理方法 ====================
-
-  // 测试获取用户资料点击
-  private onTestProfileClick() {
-    console.log('点击测试获取用户资料按钮');
-
-    // 调用 getProfile 方法
-    getProfile().then((response) => {
-      console.log("you clicked getProfile btn!");
-      console.log('获取用户资料成功:', response);
-      //   if (response) {
-      //
-      //
-      //     // 如果获取成功，更新用户信息显示
-      //     if (response.code === 200 && response.data) {
-      //       this.userInfo = {
-      //         nickname: response.data.nickname || this.userInfo.nickname,
-      //         avatar: response.data.avatar || this.userInfo.avatar,
-      //         email: response.data.email || this.userInfo.email
-      //       };
-      //       console.log('用户信息已更新');
-      //     } else {
-      //       console.log('获取用户资料失败:', response.message);
-      //     }
-      //   } else {
-      //     console.log('获取用户资料失败: 返回空响应');
-      //   }
-      // }).catch((error) => {
-      //   console.error('获取用户资料异常:', error);
-      // });
-    });
-  }
   // ==================== 顶部用户信息卡片 ====================
 
   @Builder
@@ -149,14 +168,26 @@ export default struct ProfilePage {
         Row({ space: 15 }) {
           // 左侧头像
           Column() {
-            // 头像图片
-            Image($r('app.media.startIcon'))
-              .width(80)
-              .height(80)
-              .objectFit(ImageFit.Cover)
-              .borderRadius(40)
-              .border({ width: 2, color: '#F0F0F0' })
-              .shadow({ radius: 4, color: '#00000010' })
+            // 如果服务器返回了头像URL，使用远程图片，否则使用本地图片
+            if (this.userInfo.avatar && this.userInfo.avatar !== 'https://avatars.githubusercontent.com/u/1?v=4') {
+              // 使用网络图片
+              Image(this.userInfo.avatar)
+                .width(80)
+                .height(80)
+                .objectFit(ImageFit.Cover)
+                .borderRadius(40)
+                .border({ width: 2, color: '#F0F0F0' })
+                .shadow({ radius: 4, color: '#00000010' })
+            } else {
+              // 使用本地默认头像
+              Image($r('app.media.startIcon'))
+                .width(80)
+                .height(80)
+                .objectFit(ImageFit.Cover)
+                .borderRadius(40)
+                .border({ width: 2, color: '#F0F0F0' })
+                .shadow({ radius: 4, color: '#00000010' })
+            }
           }
           .width(80)
           .height(80)
@@ -171,12 +202,50 @@ export default struct ProfilePage {
               .textAlign(TextAlign.Start)
               .width('100%')
 
+            // 用户名（只在用户名和昵称不同时显示）
+            if (this.username && this.username !== this.userInfo.nickname) {
+              Text(`用户名: ${this.username}`)
+                .fontSize(14)
+                .fontColor('#999999')
+                .textAlign(TextAlign.Start)
+                .width('100%')
+            }
+
             // 用户邮箱
             Text(this.userInfo.email)
               .fontSize(15)
               .fontColor('#666666')
               .textAlign(TextAlign.Start)
               .width('100%')
+
+            // 用户ID和积分信息
+            Row({ space: 12 }) {
+              if (this.userId > 0) {
+                Text(`ID: ${this.userId}`)
+                  .fontSize(12)
+                  .fontColor('#999999')
+                  .backgroundColor('#F0F0F0')
+                  .padding({ left: 8, right: 8, top: 2, bottom: 2 })
+                  .borderRadius(4)
+              }
+
+              Text(`积分: ${this.userPoints}`)
+                .fontSize(12)
+                .fontColor('#FF9500')
+                .backgroundColor('#FFF4E6')
+                .padding({ left: 8, right: 8, top: 2, bottom: 2 })
+                .borderRadius(4)
+
+              if (this.userCheckinCount > 0) {
+                Text(`打卡: ${this.userCheckinCount}`)
+                  .fontSize(12)
+                  .fontColor('#34C759')
+                  .backgroundColor('#E8F7E8')
+                  .padding({ left: 8, right: 8, top: 2, bottom: 2 })
+                  .borderRadius(4)
+              }
+            }
+            .margin({ top: 4 })
           }
           .layoutWeight(1) // 占据剩余空间
         }
@@ -238,12 +307,29 @@ export default struct ProfilePage {
             .textAlign(TextAlign.Start)
             .width('100%')
 
-          if (item.subtitle) {
-            Text(item.subtitle)
-              .fontSize(13)
-              .fontColor('#666666')
-              .textAlign(TextAlign.Start)
-              .width('100%')
+          // 动态更新副标题（我的礼品不显示副标题）
+          if (item.subtitle && item.id !== 'gifts') {
+            if (item.id === 'points') {
+              // 积分功能项显示真实积分
+              Text(`当前积分：${this.userPoints}`)
+                .fontSize(13)
+                .fontColor('#666666')
+                .textAlign(TextAlign.Start)
+                .width('100%')
+            } else if (item.id === 'checkin') {
+              // 打卡记录功能项显示真实打卡次数
+              Text(`打卡次数：${this.userCheckinCount}`)
+                .fontSize(13)
+                .fontColor('#666666')
+                .textAlign(TextAlign.Start)
+                .width('100%')
+            } else {
+              Text(item.subtitle)
+                .fontSize(13)
+                .fontColor('#666666')
+                .textAlign(TextAlign.Start)
+                .width('100%')
+            }
           }
         }
         .layoutWeight(1) // 占据剩余空间
@@ -296,7 +382,7 @@ export default struct ProfilePage {
     .margin({ left: 15, right: 15, top: 10, bottom: 30 })
   }
 
-  // ==================== 点击事件处理 ====================
+  // ==================== 事件处理方法 ====================
 
   // 功能项点击
   private onFunctionItemClick(item: FunctionItem) {
@@ -313,23 +399,35 @@ export default struct ProfilePage {
         this.onGiftsClick();
         break;
       case 'edit':
-        this.onEditProfileClick();
+        this.onEditProfileClick();  // 修改：跳转到修改个人信息页面
         break;
       case 'settings':
         this.onSettingsClick();
         break;
-      case 'help':  // 新增case
+      case 'help':
         this.onHelpClick();
         break;
     }
   }
 
-
-  // 编辑个人信息点击 - 点击"修改个人信息"功能项时调用
+  // 编辑个人信息点击
   private onEditProfileClick() {
     console.log('点击修改个人信息，跳转到编辑页面');
-    // 这里可以跳转到修改个人信息页面
-    // 所有编辑操作（头像、昵称、邮箱）都在那个页面完成
+
+    // 使用router跳转到修改个人信息页面
+    const promise: Promise<void> = router.pushUrl({
+      url: 'pages/EditProfilePage',
+      params: {
+        from: 'profile',
+        timestamp: new Date().getTime()
+      }
+    });
+
+    promise.then((): void => {
+      console.log('成功跳转到修改个人信息页面');
+    }).catch((error: Error): void => {
+      console.error('跳转到修改个人信息页面失败:', error.message);
+    });
   }
 
   // 打卡记录点击
@@ -356,7 +454,6 @@ export default struct ProfilePage {
   private onHelpClick(): void {
     console.log('点击帮助，跳转到智能问答界面');
 
-    // 明确指定类型
     const promise: Promise<void> = router.pushUrl({
       url: 'pages/AssistantPage',
       params: {
@@ -393,9 +490,114 @@ export default struct ProfilePage {
 
   // 加载用户信息
   private loadUserInfo() {
-    console.log('加载用户信息...');
-    setTimeout(() => {
-      console.log('用户信息加载完成');
-    }, 500);
+    console.log('开始加载用户信息...');
+
+    // 显示加载状态
+    this.isLoading = true;
+    this.isError = false;
+    this.errorMessage = '';
+
+    // 调用 getProfile 方法
+    getProfile().then((response) => {
+      console.log('获取用户资料API响应:', response);
+
+      if (response) {
+        // 如果获取成功，更新用户信息显示
+        if (response.code === 200 && response.data) {
+          const userData = response.data;
+
+          console.log('服务器返回的用户数据:', userData);
+
+          // 保存用户名
+          this.username = userData.username || '';
+
+          // 确定显示昵称：如果昵称为空，使用用户名
+          let displayNickname = userData.nickname;
+          if (!displayNickname || displayNickname.trim() === '') {
+            displayNickname = this.username || this.userInfo.nickname;
+          }
+
+          // 更新用户信息，如果数据为空则保留原有数据
+          this.userInfo = {
+            nickname: displayNickname || this.userInfo.nickname,
+            avatar: userData.avatar || this.userInfo.avatar,
+            email: userData.email || this.userInfo.email
+          };
+
+          // 更新用户ID
+          this.userId = userData.userId || this.userId;
+
+          // 更新用户积分
+          this.userPoints = userData.points || 0;  // 修改：如果返回为空，设为0
+
+          // 更新打卡次数
+          this.userCheckinCount = userData.checkinCount || 0;
+
+          // 更新功能列表的副标题
+          this.updateFunctionListSubtitles();
+
+          console.log('用户信息已更新:', this.userInfo);
+          console.log('用户名:', this.username);
+          console.log('用户积分:', this.userPoints);
+          console.log('打卡次数:', this.userCheckinCount);
+          console.log('用户ID:', this.userId);
+        } else {
+          console.log('获取用户资料失败，服务器返回错误:', response.msg || '未知错误');
+          this.isError = true;
+          this.errorMessage = response.msg || '服务器返回错误';
+        }
+      } else {
+        console.log('获取用户资料失败: 返回空响应');
+        this.isError = true;
+        this.errorMessage = '服务器返回空响应';
+      }
+    }).catch((error: Error) => {
+      console.error('获取用户资料异常:', error);
+      this.isError = true;
+      this.errorMessage = error.message || '网络请求失败';
+    }).finally(() => {
+      // 隐藏加载状态
+      this.isLoading = false;
+      console.log('加载用户信息完成');
+    });
+  }
+
+  // 更新功能列表副标题
+  private updateFunctionListSubtitles() {
+    // 使用 map 方法创建新的数组
+    this.functionList = this.functionList.map((item: FunctionItem) => {
+      if (item.id === 'points') {
+        return {
+          id: item.id,
+          icon: item.icon,
+          title: item.title,
+          subtitle: `当前积分：${this.userPoints}`,
+          showArrow: item.showArrow,
+          route: item.route
+        };
+      } else if (item.id === 'checkin') {
+        return {
+          id: item.id,
+          icon: item.icon,
+          title: item.title,
+          subtitle: `打卡次数：${this.userCheckinCount}`,
+          showArrow: item.showArrow,
+          route: item.route
+        };
+      } else if (item.id === 'gifts') {
+        // 我的礼品项：去掉副标题
+        return {
+          id: item.id,
+          icon: item.icon,
+          title: item.title,
+          showArrow: item.showArrow,  // 这里不设置 subtitle
+          route: item.route
+        };
+      } else {
+        return item;
+      }
+    });
+
+    console.log('功能列表已更新:', this.functionList);
   }
 }

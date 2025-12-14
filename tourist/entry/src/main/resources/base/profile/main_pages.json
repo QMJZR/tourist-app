@@ -6,6 +6,7 @@
     "pages/AssistantPage",
     "pages/LoginPage",
     "pages/RegisterPage",
-    "pages/DiscoverPage"
+    "pages/DiscoverPage",
+    "pages/EditProfilePage"
   ]
 }

@@ -6,12 +6,39 @@ export class RegisterRequest {
   email: string = '';
 }
 
+// 修改个人信息请求接口
+export class UpdateProfileRequest {
+  nickname: string = '';  // 保持与现有接口一致，使用空字符串
+  avatar: string = '';
+  email: string = '';
+}
+
+// 更新后的用户信息响应接口 - 与ProfileApiResponse保持一致
+interface GeneratedTypeLiteralInterface_3 {
+  userId: number;
+  username: string;
+  nickname: string;
+  avatar: string;
+  points: number;
+  checkinCount: number;
+  isMerchant: string;
+  checkinSpotIds: number[];
+  email: string;
+}
+
+interface UpdateProfileApiResponse {
+  code: number;
+  msg: string;  // 注意：根据你的现有接口，使用msg而不是message
+  data: GeneratedTypeLiteralInterface_3;
+}
+
+
 export async function register(RegisterData: RegisterRequest): Promise<string> {
   let request = http.createHttp();
 
   try {
     const response = await request.request(
-      "http://10.54.35.223:8080/api/v1/auth/register",  // 注意：http:// 不是 https://
+      "http://10.54.37.27:8080/api/v1/auth/register",  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.POST,
         header: {
@@ -77,7 +104,7 @@ export async function login(loginData: LoginRequest): Promise<string> {
 
   try {
     const response = await request.request(
-      "http://10.54.35.223:8080/api/v1/auth/login",
+      "http://10.54.37.27:8080/api/v1/auth/login",
       {
         method: http.RequestMethod.POST,
         header: {
@@ -152,7 +179,7 @@ export async function getProfile(): Promise<ProfileApiResponse | void> {
     const userId = await StorageUtil.getUserId();
     console.log("when getProfile, i got userId:", userId);
     const response = await request.request(
-      `http://10.54.35.223:8080/api/v1/auth/profile?userId=${userId}`,
+      `http://10.54.37.27:8080/api/v1/auth/profile?userId=${userId}`,
       {
         method: http.RequestMethod.GET,
         header: {
@@ -204,6 +231,87 @@ export async function getProfile(): Promise<ProfileApiResponse | void> {
     }
   } catch (error) {
     console.error('获取用户资料异常:', error);
+  } finally {
+    request.destroy();
+  }
+}
+
+export async function updateProfile(updateData: UpdateProfileRequest): Promise<UpdateProfileApiResponse | void> {
+  let request = http.createHttp();
+
+  try {
+    // 需要先从存储获取token
+    const token = await StorageUtil.getToken();
+    if (!token) {
+      console.warn('未找到token，请先登录');
+      return;
+    }
+
+    console.log('🔍 DEBUG: Token from storage =', token);
+    console.log('🔍 DEBUG: Token length =', token.length);
+
+    const response = await request.request(
+      "http://10.54.37.27:8080/user/profile",
+      {
+        method: http.RequestMethod.PUT,
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,  // 保持 Authorization
+          'token': token  // 同时发送 token 头
+        },
+        extraData: JSON.stringify(updateData)
+      }
+    );
+
+    console.log('🔍 DEBUG: Response Status =', response.responseCode);
+
+    // 安全的header访问
+    if (response.header) {
+      console.log('🔍 DEBUG: Response Headers =', response.header);
+    }
+
+    if (response.result) {
+      const resultStr = String(response.result);
+      console.log('🔍 DEBUG: Response Body =', resultStr);
+    }
+
+    if (response.responseCode === 200) {
+      if (response.result) {
+        const resultStr = String(response.result);
+        console.log('更新用户资料响应:', resultStr);
+
+        try {
+          const res: UpdateProfileApiResponse = JSON.parse(resultStr);
+
+          if (res.code === 200 && res.data) {
+            console.log('更新用户资料成功');
+            return res;
+          } else {
+            console.log('更新用户资料失败:', res.msg);
+            return res;
+          }
+        } catch (parseError) {
+          console.error('解析更新用户资料响应失败:', parseError);
+        }
+      } else {
+        console.warn('响应结果为空');
+      }
+    } else {
+      console.log("更新用户资料失败，状态码:", response.responseCode);
+      // 添加详细错误信息
+      if (response.result) {
+        const errorResult = String(response.result);
+        console.log("错误响应内容:", errorResult);
+        try {
+          const errorJson: UpdateProfileApiResponse = JSON.parse(errorResult);
+          console.log("错误JSON:", errorJson);
+        } catch (e) {
+          console.log("错误内容不是JSON格式");
+        }
+      }
+    }
+  } catch (error) {
+    console.error('更新用户资料异常:', error);
   } finally {
     request.destroy();
   }
