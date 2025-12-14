@@ -1,14 +1,13 @@
 // entry/src/main/ets/pages/CheckinDetailPage.ets
 
 import { router } from '@kit.ArkUI';
-import { getCheckins } from '../api/profile';
 
 // 打卡记录类型定义
 interface CheckinRecordLocal {
   checkinId: number;
   spotId: number;
   spotName: string;
-  images: string[];
+  images: Array<string>;
   pointsEarned: number;
   createdAt: string;
 }
@@ -17,7 +16,7 @@ interface CheckinRecordLocal {
 @Component
 struct CheckinDetailPage {
   @State totalCheckins: number = 0;  // 总打卡次数
-  @State checkinRecords: CheckinRecordLocal[] = [];  // 打卡记录列表
+  @State checkinRecords: Array<CheckinRecordLocal> = [];  // 打卡记录列表
   @State currentPage: number = 1;  // 当前页码
   @State totalPages: number = 1;  // 总页数
 
@@ -33,8 +32,8 @@ struct CheckinDetailPage {
     this.loadCheckinData();
   }
 
-  // 加载打卡数据
-  private async loadCheckinData() {
+  // 加载打卡数据（使用假数据）
+  private loadCheckinData() {
     if (this.isLoading) {
       return;
     }
@@ -42,42 +41,171 @@ struct CheckinDetailPage {
     this.isLoading = true;
     this.isError = false;
 
-    try {
-      const result = await getCheckins(this.currentPage);
-
-      if (result && result.code === 200 && result.data) {
-        this.checkinRecords = result.data.list || [];
-        this.totalCheckins = result.data.total || 0;
-
-        // 计算总页数
-        const pageSize = 10;  // 默认每页10条
-        this.totalPages = Math.ceil(this.totalCheckins / pageSize);
+    // 模拟网络请求延迟
+    setTimeout(() => {
+      try {
+        // 生成假数据
+        this.generateMockData();
 
         console.log(`✅ 加载打卡数据成功，共${this.totalCheckins}条记录，当前第${this.currentPage}页`);
-      } else {
+      } catch (error) {
         this.isError = true;
-        this.errorMessage = '获取打卡数据失败';
-        console.log('❌ 获取打卡数据失败');
+        this.errorMessage = '加载打卡数据失败';
+        console.error('获取打卡数据异常:', error);
+      } finally {
+        this.isLoading = false;
+        this.isRefreshing = false;
       }
-    } catch (error) {
-      this.isError = true;
-      this.errorMessage = '网络请求失败，请检查网络连接';
-      console.error('获取打卡数据异常:', error);
-    } finally {
-      this.isLoading = false;
-      this.isRefreshing = false;
+    }, 800);
+  }
+
+  // 生成假数据
+  private generateMockData() {
+    const mockRecords: Array<CheckinRecordLocal> = [
+      {
+        checkinId: 101,
+        spotId: 1,
+        spotName: '古建筑群',
+        images: ['https://images.unsplash.com/photo-1542728928-0013d5f8d5b5?w=800&auto=format&fit=crop'],
+        pointsEarned: 50,
+        createdAt: '2025-12-14 14:30:25'
+      },
+      {
+        checkinId: 102,
+        spotId: 2,
+        spotName: '特色美食街',
+        images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop'],
+        pointsEarned: 30,
+        createdAt: '2025-12-13 11:20:15'
+      },
+      {
+        checkinId: 103,
+        spotId: 3,
+        spotName: '生态湿地公园',
+        images: ['https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&auto=format&fit=crop'],
+        pointsEarned: 40,
+        createdAt: '2025-12-12 16:45:33'
+      },
+      {
+        checkinId: 104,
+        spotId: 4,
+        spotName: '艺术画廊',
+        images: ['https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=800&auto=format&fit=crop'],
+        pointsEarned: 35,
+        createdAt: '2025-12-11 10:15:42'
+      },
+      {
+        checkinId: 105,
+        spotId: 5,
+        spotName: '儿童游乐场',
+        images: ['https://images.unsplash.com/photo-1516937941344-00b4e0337589?w=800&auto=format&fit=crop'],
+        pointsEarned: 25,
+        createdAt: '2025-12-10 15:50:18'
+      },
+      {
+        checkinId: 106,
+        spotId: 6,
+        spotName: '科技体验馆',
+        images: ['https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop'],
+        pointsEarned: 60,
+        createdAt: '2025-12-09 13:25:59'
+      },
+      {
+        checkinId: 107,
+        spotId: 7,
+        spotName: '城市公园',
+        images: ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop'],
+        pointsEarned: 20,
+        createdAt: '2025-12-08 09:40:12'
+      },
+      {
+        checkinId: 108,
+        spotId: 8,
+        spotName: '购物中心',
+        images: ['https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&auto=format&fit=crop'],
+        pointsEarned: 15,
+        createdAt: '2025-12-07 18:30:27'
+      },
+      {
+        checkinId: 109,
+        spotId: 1,
+        spotName: '古建筑群',
+        images: ['https://images.unsplash.com/photo-1542728928-0013d5f8d5b5?w=800&auto=format&fit=crop'],
+        pointsEarned: 45,
+        createdAt: '2025-12-06 14:20:38'
+      },
+      {
+        checkinId: 110,
+        spotId: 2,
+        spotName: '特色美食街',
+        images: ['https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800&auto=format&fit=crop'],
+        pointsEarned: 35,
+        createdAt: '2025-12-05 12:15:22'
+      }
+    ];
+
+    // 根据当前页码加载数据
+    const pageSize = 10;  // 每页10条
+    const startIndex = (this.currentPage - 1) * pageSize;
+
+    if (this.currentPage === 1) {
+      // 第一页：显示前10条数据
+      this.checkinRecords = mockRecords.slice(0, Math.min(pageSize, mockRecords.length));
+    } else if (this.currentPage === 2) {
+      // 第二页：显示更多假数据
+      const moreMockRecords: Array<CheckinRecordLocal> = [
+        {
+          checkinId: 111,
+          spotId: 3,
+          spotName: '生态湿地公园',
+          images: ['https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&auto=format&fit=crop'],
+          pointsEarned: 40,
+          createdAt: '2025-12-04 16:10:55'
+        },
+        {
+          checkinId: 112,
+          spotId: 4,
+          spotName: '艺术画廊',
+          images: ['https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=800&auto=format&fit=crop'],
+          pointsEarned: 35,
+          createdAt: '2025-12-03 11:45:19'
+        },
+        {
+          checkinId: 113,
+          spotId: 5,
+          spotName: '儿童游乐场',
+          images: ['https://images.unsplash.com/photo-1516937941344-00b4e0337589?w=800&auto=format&fit=crop'],
+          pointsEarned: 25,
+          createdAt: '2025-12-02 14:30:44'
+        },
+        {
+          checkinId: 114,
+          spotId: 6,
+          spotName: '科技体验馆',
+          images: ['https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop'],
+          pointsEarned: 60,
+          createdAt: '2025-12-01 10:20:33'
+        }
+      ];
+      this.checkinRecords = [...this.checkinRecords, ...moreMockRecords];
     }
+
+    // 更新总数
+    this.totalCheckins = this.currentPage === 1 ? 24 : 14; // 模拟总数据量变化
+
+    // 计算总页数
+    this.totalPages = Math.ceil(this.totalCheckins / pageSize);
   }
 
   // 刷新数据
-  private async refreshData() {
+  private refreshData() {
     this.currentPage = 1;
     this.isRefreshing = true;
-    await this.loadCheckinData();
+    this.loadCheckinData();
   }
 
   // 加载更多
-  private async loadMore() {
+  private loadMore() {
     if (this.isLoading || this.currentPage >= this.totalPages) {
       return;
     }
@@ -85,23 +213,19 @@ struct CheckinDetailPage {
     this.currentPage += 1;
     this.isLoading = true;
 
-    try {
-      const result = await getCheckins(this.currentPage);
-
-      if (result && result.code === 200 && result.data) {
-        // 追加数据
-        const newRecords = result.data.list || [];
-        this.checkinRecords = [...this.checkinRecords, ...newRecords];
-
+    // 模拟网络请求延迟
+    setTimeout(() => {
+      try {
+        this.generateMockData();
         console.log(`✅ 加载更多成功，当前共${this.checkinRecords.length}条记录`);
+      } catch (error) {
+        console.error('加载更多异常:', error);
+        // 回退页码
+        this.currentPage -= 1;
+      } finally {
+        this.isLoading = false;
       }
-    } catch (error) {
-      console.error('加载更多异常:', error);
-      // 回退页码
-      this.currentPage -= 1;
-    } finally {
-      this.isLoading = false;
-    }
+    }, 800);
   }
 
   // 格式化时间（去掉秒）
@@ -175,7 +299,7 @@ struct CheckinDetailPage {
         // 中间：详情
         Column({ space: 4 }) {
           // 景点名称
-          Text(record.spotName)
+          Text(record.spotName || '未知景点')
             .fontSize(16)
             .fontColor('#333333')
             .fontWeight(FontWeight.Medium)
@@ -188,7 +312,7 @@ struct CheckinDetailPage {
               .fontSize(13)
               .fontColor('#999999')
 
-            Text(`+${record.pointsEarned}积分`)
+            Text(`+${record.pointsEarned || 0}积分`)
               .fontSize(13)
               .fontColor('#FF9500')
               .backgroundColor('#FFF4E6')
@@ -200,12 +324,25 @@ struct CheckinDetailPage {
         .layoutWeight(1)
 
         // 右侧：图片预览（如果有图片）
-        if (record.images && record.images.length > 0) {
+        if (record.images && record.images.length > 0 && record.images[0]) {
           Image(record.images[0])
             .width(40)
             .height(40)
             .objectFit(ImageFit.Cover)
             .borderRadius(8)
+        } else {
+          // 默认图片占位
+          Column() {
+            Text('📷')
+              .fontSize(20)
+              .fontColor('#999999')
+          }
+          .width(40)
+          .height(40)
+          .justifyContent(FlexAlign.Center)
+          .alignItems(HorizontalAlign.Center)
+          .backgroundColor('#F0F0F0')
+          .borderRadius(8)
         }
       }
       .width('100%')

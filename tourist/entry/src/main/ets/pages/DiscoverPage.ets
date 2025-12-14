@@ -15,14 +15,14 @@ interface DiscoverFunctionItem {
 @Component
 export default struct DiscoverPage {
   // 发现功能列表（两条功能，结构与ProfilePage保持一致）
-  @State functionList: DiscoverFunctionItem[] = [
+  @State functionList: Array<DiscoverFunctionItem> = [
     {
       id: 'ranking',
       icon: '🏆',
       title: '排行榜',
       subtitle: '查看热门景点与打卡达人',
       showArrow: true,
-      route: 'pages/RankPage'
+      route: 'pages/RankingPage'  // 跳转到排行榜页面
     },
     {
       id: 'feeds',
@@ -35,14 +35,14 @@ export default struct DiscoverPage {
   ];
 
   // 其他发现功能（可后续扩展）
-  @State otherFunctions: DiscoverFunctionItem[] = [
+  @State otherFunctions: Array<DiscoverFunctionItem> = [
     {
       id: 'nearby',
       icon: '📍',
       title: '附近推荐',
       subtitle: '发现周围的精彩景点',
       showArrow: true,
-      route: 'pages/NearbyPage'
+      route: 'pages/NearbyPage'  // 修改：跳转到附近推荐页面
     }
   ];
 
@@ -214,7 +214,7 @@ export default struct DiscoverPage {
         this.onFeedsClick();
         break;
       case 'nearby':
-        this.onNearbyClick();
+        this.onNearbyClick();  // 调用附近推荐点击方法
         break;
     }
 
@@ -234,20 +234,17 @@ export default struct DiscoverPage {
 
   // 排行榜点击
   private onRankingClick(): void {
-    console.log('点击排行榜');
+    console.log('点击排行榜，跳转到排行榜页面');
   }
 
   // 动态点击
   private onFeedsClick(): void {
-    console.log('点击动态');
-    router.pushUrl({
-      url:"pages/FeedListPage"
-    })
+    console.log('点击动态，跳转到动态页面');
   }
 
-  // 附近推荐点击
+  // 附近推荐点击 - 新增方法
   private onNearbyClick(): void {
-    console.log('点击附近推荐');
+    console.log('点击附近推荐，跳转到附近推荐页面');
   }
 
   // ==================== 生命周期方法 ====================

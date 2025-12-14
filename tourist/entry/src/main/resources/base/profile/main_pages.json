@@ -14,6 +14,8 @@
     "pages/EditProfilePage",
     "pages/PointsDetailPage",
     "pages/CheckinDetailPage",
-    "pages/GiftsDetailPage"
+    "pages/GiftsDetailPage",
+    "pages/RankingPage",
+    "pages/NearbyPage"
   ]
 }
