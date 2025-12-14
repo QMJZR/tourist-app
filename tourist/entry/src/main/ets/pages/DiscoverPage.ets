@@ -240,9 +240,9 @@ export default struct DiscoverPage {
   // 动态点击
   private onFeedsClick(): void {
     console.log('点击动态');
-    router.pushUrl({
-      url:"pages/FeedListPage"
-    })
+    // router.pushUrl({
+    //   url:"pages/FeedListPage"
+    // })
   }
 
   // 附近推荐点击
