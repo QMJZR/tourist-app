@@ -1,5 +1,7 @@
 import ProfilePage from './ProfilePage';
 import DiscoverPage from './DiscoverPage';
+import ZonesPage from './ZoneListPage';
+import SpotsPage from './SpotListPage';
 
 @Entry
 @Component

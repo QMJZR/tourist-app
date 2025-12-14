@@ -55,17 +55,16 @@ export default struct ProfilePage {
   @State isError: boolean = false;
   @State errorMessage: string = '';
 
-  // 功能列表 - 修改：我的礼品去掉副标题
-  @State functionList: FunctionItem[] = [
-    { id: 'checkin', icon: '📍', title: '打卡记录', subtitle: '查看您的打卡历史', showArrow: true, route: 'checkin_history' },
-    { id: 'points', icon: '⭐', title: '积分', subtitle: '当前积分：0', showArrow: true, route: 'points' },  // 修改：积分从0开始
-    { id: 'gifts', icon: '🎁', title: '我的礼品', showArrow: true, route: 'gifts' },  // 修改：移除副标题
+  // 功能列表 - 修改：移除了设置功能栏，修改了礼品功能栏
+  @State functionList: Array<FunctionItem> = [
+    { id: 'checkin', icon: '📍', title: '打卡记录', subtitle: '查看您的打卡历史', showArrow: true, route: 'checkin_detail' },
+    { id: 'points', icon: '⭐', title: '积分', subtitle: '当前积分：0', showArrow: true, route: 'points_detail' },
+    { id: 'gifts', icon: '🎁', title: '我的礼品', showArrow: true, route: 'gifts_detail' },  // 修改：route改为gifts_detail
     { id: 'edit', icon: '✏️', title: '修改个人信息', showArrow: true, route: 'edit_profile' }
   ];
 
-  // 其他功能项
-  @State otherFunctions: FunctionItem[] = [
-    { id: 'settings', icon: '⚙️', title: '设置', showArrow: true, route: 'settings' },
+  // 其他功能项 - 移除了设置功能栏，只保留帮助
+  @State otherFunctions: Array<FunctionItem> = [
     { id: 'help', icon: '❓', title: '帮助', showArrow: true, route: 'assistant' }
   ];
 
@@ -393,16 +392,13 @@ export default struct ProfilePage {
         this.onCheckinRecordClick();
         break;
       case 'points':
-        this.onPointsClick();
+        this.onPointsClick();  // 调用积分点击方法
         break;
       case 'gifts':
-        this.onGiftsClick();
+        this.onGiftsClick();  // 调用礼品点击方法
         break;
       case 'edit':
-        this.onEditProfileClick();  // 修改：跳转到修改个人信息页面
-        break;
-      case 'settings':
-        this.onSettingsClick();
+        this.onEditProfileClick();
         break;
       case 'help':
         this.onHelpClick();
@@ -414,7 +410,6 @@ export default struct ProfilePage {
   private onEditProfileClick() {
     console.log('点击修改个人信息，跳转到编辑页面');
 
-    // 使用router跳转到修改个人信息页面
     const promise: Promise<void> = router.pushUrl({
       url: 'pages/EditProfilePage',
       params: {
@@ -432,22 +427,59 @@ export default struct ProfilePage {
 
   // 打卡记录点击
   private onCheckinRecordClick() {
-    console.log('点击打卡记录');
+    console.log('点击打卡记录，跳转到打卡详情页面');
+
+    const promise: Promise<void> = router.pushUrl({
+      url: 'pages/CheckinDetailPage',
+      params: {
+        from: 'profile',
+        timestamp: new Date().getTime()
+      }
+    });
+
+    promise.then((): void => {
+      console.log('成功跳转到打卡详情页面');
+    }).catch((error: Error): void => {
+      console.error('跳转到打卡详情页面失败:', error.message);
+    });
   }
 
-  // 积分点击
+  // 积分点击 - 跳转到积分详情页面
   private onPointsClick() {
-    console.log('点击积分');
+    console.log('点击积分，跳转到积分详情页面');
+
+    const promise: Promise<void> = router.pushUrl({
+      url: 'pages/PointsDetailPage',
+      params: {
+        from: 'profile',
+        timestamp: new Date().getTime()
+      }
+    });
+
+    promise.then((): void => {
+      console.log('成功跳转到积分详情页面');
+    }).catch((error: Error): void => {
+      console.error('跳转到积分详情页面失败:', error.message);
+    });
   }
 
-  // 我的礼品点击
+  // 我的礼品点击 - 修改：跳转到礼品详情页面
   private onGiftsClick() {
-    console.log('点击我的礼品');
-  }
+    console.log('点击我的礼品，跳转到礼品详情页面');
 
-  // 设置点击
-  private onSettingsClick() {
-    console.log('点击设置');
+    const promise: Promise<void> = router.pushUrl({
+      url: 'pages/GiftsDetailPage',
+      params: {
+        from: 'profile',
+        timestamp: new Date().getTime()
+      }
+    });
+
+    promise.then((): void => {
+      console.log('成功跳转到礼品详情页面');
+    }).catch((error: Error): void => {
+      console.error('跳转到礼品详情页面失败:', error.message);
+    });
   }
 
   // 帮助点击
@@ -528,7 +560,7 @@ export default struct ProfilePage {
           this.userId = userData.userId || this.userId;
 
           // 更新用户积分
-          this.userPoints = userData.points || 0;  // 修改：如果返回为空，设为0
+          this.userPoints = userData.points || 0;
 
           // 更新打卡次数
           this.userCheckinCount = userData.checkinCount || 0;
@@ -590,7 +622,7 @@ export default struct ProfilePage {
           id: item.id,
           icon: item.icon,
           title: item.title,
-          showArrow: item.showArrow,  // 这里不设置 subtitle
+          showArrow: item.showArrow,
           route: item.route
         };
       } else {
