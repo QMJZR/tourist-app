@@ -10,6 +10,7 @@
     "pages/SpotListPage",
     "pages/SpotDetailPage",
     "pages/DiscoverPage",
-    "pages/EditProfilePage"
+    "pages/EditProfilePage",
+    "pages/FeedListPage"
   ]
 }

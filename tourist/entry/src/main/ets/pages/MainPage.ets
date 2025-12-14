@@ -1,6 +1,8 @@
 import ProfilePage from './ProfilePage';
 import DiscoverPage from './DiscoverPage';
-
+import SpotsPage from './SpotListPage'
+import ZonesPage from './ZoneListPage'
+import CheckinSpotsPage from './CheckInSpotsPage'
 @Entry
 @Component
 struct MainPage {
@@ -9,22 +11,18 @@ struct MainPage {
   build() {
     Tabs({ barPosition: BarPosition.End }) {
       TabContent() {
-        // 首页 - 景区列表
-        //this.buildZoneListPage()
         ZonesPage();
       }
       .tabBar('景区')
 
       TabContent() {
-        // 首页 - 景区列表
-        //this.buildZoneListPage()
         SpotsPage();
       }
-      .tabBar('首页')
+      .tabBar('景点')
 
       TabContent() {
         // 地图打卡
-        this.buildMapCheckInPage()
+        CheckinSpotsPage();
       }
       .tabBar('打卡')
 

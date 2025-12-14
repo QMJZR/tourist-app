@@ -53,6 +53,7 @@ export interface SpotRequest {
   type?:string;
   keyword?:string;
   page?:number;
+  pageSize?:number;
 }
 
 export interface SpotResponse {
@@ -65,40 +66,50 @@ export interface SpotResponse {
   total:number;
 }
 
-export async function getSpots(data:SpotRequest): Promise<void> {
+export async function getSpots(params:SpotRequest): Promise<SpotResponse | void> {
   let request = http.createHttp();
   try {
+    let url = "http://10.54.35.223:8080/api/v1/spots";
+    if (params) {
+      const queryParts: string[] = [];
+
+      if (params.zoneId !== undefined) queryParts.push(`zoneId=${params.zoneId}`);
+      if (params.type) queryParts.push(`type=${encodeURIComponent(params.type)}`);
+      if (params.keyword) queryParts.push(`keyword=${encodeURIComponent(params.keyword)}`);
+      if (params.page !== undefined) queryParts.push(`page=${params.page}`);
+      if (params.pageSize !== undefined) queryParts.push(`pageSize=${params.pageSize}`);
+
+      if (queryParts.length > 0) {
+        url += `?${queryParts.join('&')}`;
+      }
+    }
     const response = await request.request(
-      "http://10.54.35.223:8080/api/v1/spots",  // 注意：http:// 不是 https://
+      url,  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.GET,
         header: {
           'Content-Type': 'application/json'
-        },
-        extraData: data
+        }
       }
     );
     if (response.responseCode === 200) {
-      console.log("getZones请求成功");
-      console.log(String(response.result));
-      // 安全地获取结果
+      console.log("getSpots请求成功");
       if (response.result) {
         const str = String(response.result);
-        const responseData: ZonesResponse = JSON.parse(str);
-        //return responseData.data;// 返回
+        const responseData: SpotResponse = JSON.parse(str);
+        return responseData;
       } else {
-        console.warn('响应结果为空');
-        return ;  // 返回空JSON对象字符串
+        console.warn('getSpots响应结果为空');
+        return;
       }
     } else {
-      console.log("请求失败，状态码:", response.responseCode);
+      console.log("getSpots请求失败，状态码:", response.responseCode);
       return;
     }
   } catch (error) {
-    console.error('注册请求异常:', error);
-    return ;
+    console.error('getSpots请求异常:', error);
+    return;
   } finally {
-    // 确保销毁请求对象
     request.destroy();
   }
 }
@@ -140,11 +151,11 @@ export async function getSpotDetail(id:number): Promise<void> {
         return ;  // 返回空JSON对象字符串
       }
     } else {
-      console.log("请求失败，状态码:", response.responseCode);
+      console.log("getZoneDetail请求失败，状态码:", response.responseCode);
       return;
     }
   } catch (error) {
-    console.error('注册请求异常:', error);
+    console.error('getZoneDetail请求异常:', error);
     return ;
   } finally {
     // 确保销毁请求对象
