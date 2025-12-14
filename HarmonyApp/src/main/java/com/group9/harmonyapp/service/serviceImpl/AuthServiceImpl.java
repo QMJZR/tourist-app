@@ -79,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
         vo.setPoints(u.getPoints());
         vo.setCheckinCount(u.getCheckinCount());
         vo.setIsMerchant(u.getIsMerchant());
+        vo.setNickname(u.getNickname());
         vo.setCheckinSpotIds(checkinService.getCheckinSpotsByUser(u.getId()).stream().map(CheckinRecord::getSpotId).distinct().collect(Collectors.toList()));
         vo.setEmail(u.getEmail());
         return vo;

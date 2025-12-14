@@ -8,6 +8,7 @@ import java.util.List;
 public class UserProfileVO {
     private Long userId;
     private String username;
+    private String nickname;
     private String avatar;
     private Integer points;
     private Integer checkinCount;

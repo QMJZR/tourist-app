@@ -9,6 +9,7 @@
     "pages/ZoneListPage",
     "pages/SpotListPage",
     "pages/SpotDetailPage",
-    "pages/DiscoverPage"
+    "pages/DiscoverPage",
+    "pages/EditProfilePage"
   ]
 }
