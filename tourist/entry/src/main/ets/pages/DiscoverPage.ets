@@ -235,6 +235,9 @@ export default struct DiscoverPage {
   // 排行榜点击
   private onRankingClick(): void {
     console.log('点击排行榜');
+    router.pushUrl({
+      url:"pages/RankingPage"
+    })
   }
 
   // 动态点击
