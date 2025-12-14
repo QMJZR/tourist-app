@@ -8,7 +8,7 @@
     "pages/RegisterPage",
     "pages/ZoneListPage",
     "pages/SpotListPage",
-    "pages/SpotDetailPage"
-
+    "pages/SpotDetailPage",
+    "pages/DiscoverPage"
   ]
 }

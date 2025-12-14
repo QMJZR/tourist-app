@@ -1,7 +1,5 @@
-// pages/MainPage.ets
 import ProfilePage from './ProfilePage';
-import ZonesPage from "./ZoneListPage";
-import SpotsPage from './SpotListPage';
+import DiscoverPage from './DiscoverPage';
 
 @Entry
 @Component
@@ -22,7 +20,7 @@ struct MainPage {
         //this.buildZoneListPage()
         SpotsPage();
       }
-      .tabBar('景点')
+      .tabBar('首页')
 
       TabContent() {
         // 地图打卡
@@ -31,8 +29,8 @@ struct MainPage {
       .tabBar('打卡')
 
       TabContent() {
-        // 动态
-        this.buildFeedListPage()
+        // 发现
+        DiscoverPage()
       }
       .tabBar('发现')
 
