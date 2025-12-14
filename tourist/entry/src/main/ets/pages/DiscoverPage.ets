@@ -15,14 +15,14 @@ interface DiscoverFunctionItem {
 @Component
 export default struct DiscoverPage {
   // 发现功能列表（两条功能，结构与ProfilePage保持一致）
-  @State functionList: Array<DiscoverFunctionItem> = [
+  @State functionList: DiscoverFunctionItem[] = [
     {
       id: 'ranking',
       icon: '🏆',
       title: '排行榜',
       subtitle: '查看热门景点与打卡达人',
       showArrow: true,
-      route: 'pages/RankingPage'  // 跳转到排行榜页面
+      route: 'pages/RankPage'
     },
     {
       id: 'feeds',
@@ -42,7 +42,7 @@ export default struct DiscoverPage {
       title: '附近推荐',
       subtitle: '发现周围的精彩景点',
       showArrow: true,
-      route: 'pages/NearbyPage'  // 修改：跳转到附近推荐页面
+      route: 'pages/NearbyPage'
     }
   ];
 
@@ -234,15 +234,18 @@ export default struct DiscoverPage {
 
   // 排行榜点击
   private onRankingClick(): void {
-    console.log('点击排行榜，跳转到排行榜页面');
+    console.log('点击排行榜');
   }
 
   // 动态点击
   private onFeedsClick(): void {
-    console.log('点击动态，跳转到动态页面');
+    console.log('点击动态');
+    router.pushUrl({
+      url:"pages/FeedListPage"
+    })
   }
 
-  // 附近推荐点击 - 新增方法
+  // 附近推荐点击
   private onNearbyClick(): void {
     console.log('点击附近推荐，跳转到附近推荐页面');
   }
