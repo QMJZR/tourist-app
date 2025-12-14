@@ -11,11 +11,15 @@ struct MainPage {
   build() {
     Tabs({ barPosition: BarPosition.End }) {
       TabContent() {
+        // 首页 - 景区列表
+        //this.buildZoneListPage()
         ZonesPage();
       }
       .tabBar('景区')
 
       TabContent() {
+        // 首页 - 景区列表
+        //this.buildZoneListPage()
         SpotsPage();
       }
       .tabBar('景点')

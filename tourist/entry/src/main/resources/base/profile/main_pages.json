@@ -10,7 +10,10 @@
     "pages/SpotListPage",
     "pages/SpotDetailPage",
     "pages/DiscoverPage",
+    "pages/FeedListPage",
     "pages/EditProfilePage",
-    "pages/FeedListPage"
+    "pages/PointsDetailPage",
+    "pages/CheckinDetailPage",
+    "pages/GiftsDetailPage"
   ]
 }
