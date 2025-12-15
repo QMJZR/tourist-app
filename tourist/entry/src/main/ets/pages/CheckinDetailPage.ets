@@ -1,6 +1,7 @@
 // entry/src/main/ets/pages/CheckinDetailPage.ets
 
 import { router } from '@kit.ArkUI';
+import { getCheckins, CheckinsApiResponse } from '../api/profile';
 
 // 打卡记录类型定义
 interface CheckinRecordLocal {
@@ -25,6 +26,7 @@ struct CheckinDetailPage {
   @State isRefreshing: boolean = false;
   @State isError: boolean = false;
   @State errorMessage: string = '';
+  @State apiFailed: boolean = false; // API调用失败标记
 
   // 生命周期：页面显示时
   aboutToAppear() {
@@ -32,22 +34,118 @@ struct CheckinDetailPage {
     this.loadCheckinData();
   }
 
-  // 加载打卡数据（使用假数据）
-  private loadCheckinData() {
+  // 加载打卡数据（优先调用接口）
+  private async loadCheckinData() {
     if (this.isLoading) {
       return;
     }
 
     this.isLoading = true;
     this.isError = false;
+    this.apiFailed = false;
 
+    console.log('开始加载打卡数据...');
+
+    try {
+      // 先尝试调用接口获取数据
+      const response = await getCheckins(this.currentPage);
+
+      // 先进行类型断言，确保response是CheckinsApiResponse类型
+      const typedResponse = response as CheckinsApiResponse;
+
+      // 检查响应是否有效
+      if (typedResponse && typedResponse.code === 200 && typedResponse.data) {
+        console.log('✅ 打卡接口调用成功，获取到', typedResponse.data.list.length, '条记录');
+        this.processApiData(typedResponse);
+        this.isLoading = false;
+        this.isRefreshing = false;
+        return;
+      }
+
+      // 接口调用失败的情况
+      console.warn('打卡接口返回数据异常，使用假数据');
+      this.apiFailed = true;
+
+      // 检查是否有错误消息
+      if (typedResponse && typedResponse.msg) {
+        this.errorMessage = typedResponse.msg;
+      } else {
+        this.errorMessage = '接口返回数据异常';
+      }
+
+    } catch (error) {
+      console.error('打卡接口调用失败:', error);
+      this.apiFailed = true;
+      this.errorMessage = '网络请求失败，请检查网络连接';
+    }
+
+    // 如果接口调用失败，使用假数据
+    console.log('使用假数据');
+    this.useMockData();
+  }
+
+  // 处理API返回的数据
+  private processApiData(response: CheckinsApiResponse) {
+    if (!response.data || !response.data.list) {
+      console.warn('API返回数据为空');
+      return;
+    }
+
+    const apiItems = response.data.list;
+    console.log('处理API打卡数据:', apiItems);
+
+    // 将API数据转换为页面需要的数据格式
+    const convertedRecords: CheckinRecordLocal[] = apiItems.map((item, index) => {
+      // 明确创建符合 CheckinRecordLocal 接口的对象
+      const record: CheckinRecordLocal = {
+        checkinId: item.checkinId || (index + 101),
+        spotId: item.spotId || index + 1,
+        spotName: item.spotName || `景点${index + 1}`,
+        images: item.images || [],
+        pointsEarned: item.pointsEarned || Math.floor(Math.random() * 50) + 10,
+        createdAt: item.createdAt || this.generateMockTime(index)
+      };
+
+      return record;
+    });
+
+    // 如果是第一页，直接设置数据
+    if (this.currentPage === 1) {
+      this.checkinRecords = convertedRecords;
+    } else {
+      // 否则追加数据
+      this.checkinRecords = [...this.checkinRecords, ...convertedRecords];
+    }
+
+    // 更新总数和页数
+    this.totalCheckins = response.data.total || convertedRecords.length;
+    const pageSize = 10; // 每页10条
+    this.totalPages = Math.ceil(this.totalCheckins / pageSize);
+
+    console.log('数据转换完成，共', this.checkinRecords.length, '条记录，总', this.totalCheckins, '次');
+  }
+
+  // 生成模拟时间
+  private generateMockTime(index: number): string {
+    const now = new Date();
+    const daysAgo = Math.floor(index / 2); // 每两条记录间隔一天
+    const date = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+
+    const hours = 9 + (index % 8); // 9点到17点之间
+    const minutes = (index * 7) % 60;
+    const seconds = (index * 11) % 60;
+
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  // 使用假数据
+  private useMockData() {
     // 模拟网络请求延迟
     setTimeout(() => {
       try {
         // 生成假数据
         this.generateMockData();
-
-        console.log(`✅ 加载打卡数据成功，共${this.totalCheckins}条记录，当前第${this.currentPage}页`);
+        console.log(`✅ 使用假数据加载成功，共${this.totalCheckins}条记录，当前第${this.currentPage}页`);
       } catch (error) {
         this.isError = true;
         this.errorMessage = '加载打卡数据失败';
@@ -59,7 +157,7 @@ struct CheckinDetailPage {
     }, 800);
   }
 
-  // 生成假数据
+  // 生成假数据（保留原有的假数据生成逻辑）
   private generateMockData() {
     const mockRecords: Array<CheckinRecordLocal> = [
       {
@@ -146,7 +244,6 @@ struct CheckinDetailPage {
 
     // 根据当前页码加载数据
     const pageSize = 10;  // 每页10条
-    const startIndex = (this.currentPage - 1) * pageSize;
 
     if (this.currentPage === 1) {
       // 第一页：显示前10条数据
@@ -205,7 +302,7 @@ struct CheckinDetailPage {
   }
 
   // 加载更多
-  private loadMore() {
+  private async loadMore() {
     if (this.isLoading || this.currentPage >= this.totalPages) {
       return;
     }
@@ -213,26 +310,88 @@ struct CheckinDetailPage {
     this.currentPage += 1;
     this.isLoading = true;
 
-    // 模拟网络请求延迟
-    setTimeout(() => {
-      try {
+    // 如果API之前失败了，直接使用假数据
+    if (this.apiFailed) {
+      setTimeout(() => {
+        try {
+          this.generateMockData();
+          console.log(`✅ 加载更多成功，当前共${this.checkinRecords.length}条记录`);
+        } catch (error) {
+          console.error('加载更多异常:', error);
+          // 回退页码
+          this.currentPage -= 1;
+        } finally {
+          this.isLoading = false;
+        }
+      }, 800);
+      return;
+    }
+
+    // 否则尝试调用API
+    try {
+      const response = await getCheckins(this.currentPage);
+
+      // 使用类型断言
+      const typedResponse = response as CheckinsApiResponse;
+
+      // 使用类型检查
+      if (typedResponse && typedResponse.code === 200 && typedResponse.data) {
+        console.log('✅ 加载更多接口调用成功');
+        this.processApiData(typedResponse);
+      } else {
+        console.warn('加载更多接口调用失败，使用本地数据');
         this.generateMockData();
-        console.log(`✅ 加载更多成功，当前共${this.checkinRecords.length}条记录`);
-      } catch (error) {
-        console.error('加载更多异常:', error);
-        // 回退页码
-        this.currentPage -= 1;
-      } finally {
-        this.isLoading = false;
       }
-    }, 800);
+    } catch (error) {
+      console.error('加载更多接口调用异常:', error);
+      // 回退页码
+      this.currentPage -= 1;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // 构建API失败提示
+  @Builder
+  buildApiFailNotice() {
+    if (this.apiFailed && !this.isLoading) {
+      Row({ space: 8 }) {
+        Text('⚠️')
+          .fontSize(14)
+          .fontColor('#FF9500')
+
+        Text('接口调用失败，已显示模拟数据')
+          .fontSize(12)
+          .fontColor('#666666')
+          .layoutWeight(1)
+
+        Button('重试')
+          .fontSize(12)
+          .backgroundColor('#007AFF10')
+          .borderRadius(8)
+          .padding({ left: 8, right: 8 })
+          .height(24)
+          .onClick(() => {
+            console.log('点击重试接口');
+            this.refreshData();
+          })
+      }
+      .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+      .backgroundColor('#FFF8E6')
+      .borderRadius(8)
+      .margin({ left: 16, right: 16, top: 8 })
+      .shadow({ radius: 2, color: '#00000004' })
+    }
   }
 
   // 格式化时间（去掉秒）
   private formatTime(createdAt: string): string {
     if (!createdAt) return '';
     // 将 "2025-01-11 14:20:33" 格式化为 "2025-01-11 14:20"
-    return createdAt.substring(0, 16);
+    if (createdAt.length >= 16) {
+      return createdAt.substring(0, 16);
+    }
+    return createdAt;
   }
 
   // 构建打卡卡片
@@ -363,6 +522,9 @@ struct CheckinDetailPage {
   @Builder
   buildRecordsList() {
     Column() {
+      // API失败提示
+      this.buildApiFailNotice()
+
       // 列表标题
       Row({ space: 8 }) {
         Text('打卡记录')

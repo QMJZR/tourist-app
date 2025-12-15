@@ -101,7 +101,5 @@ struct LoginPage {
       }
     });
 
-    //get profile
-   // getProfile();
   }
 }

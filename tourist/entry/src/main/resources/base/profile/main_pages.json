@@ -16,6 +16,8 @@
     "pages/CheckinDetailPage",
     "pages/GiftsDetailPage",
     "pages/RankingPage",
-    "pages/NearbyPage"
+    "pages/NearbyPage",
+    "pages/CheckInSpotsPage",
+    "pages/SubmitCheckInPage"
   ]
 }

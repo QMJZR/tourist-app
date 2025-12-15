@@ -30,14 +30,22 @@ public class CheckinController {
     @PostMapping("/submit")
     public Response<CheckinResultDTO> submit(
             @RequestBody CheckinSubmitRequest req,
-            @RequestHeader("Authorization") String auth
-    )
-    {
-        if(tokenUtil.verifyToken(auth)){
-            return Response.buildSuccess(checkinService.submitCheckin(tokenUtil.getUser(auth).getId(), req));
-        }else {
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestHeader(value = "token", required = false) String tokenHeader
+    ) {
+        String token = null;
+        if (authorization != null && authorization.startsWith("Bearer ")) {
+            token = authorization.substring(7);
+        } else if (authorization != null) {
+            token = authorization;
+        } else if (tokenHeader != null) {
+            token = tokenHeader;
+        }
+
+        if (token == null || !tokenUtil.verifyToken(token)) {
             return Response.buildFailure("未授权的访问，请先登录", 1201);
         }
 
+        return Response.buildSuccess(checkinService.submitCheckin(tokenUtil.getUser(token).getId(), req));
     }
 }

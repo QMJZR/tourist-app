@@ -1,6 +1,7 @@
 // entry/src/main/ets/pages/NearbyPage.ets
 
 import { router } from '@kit.ArkUI';
+import { getNearbyRecommendations, NearbyItem, NearbyApiResponse } from '../api/recommend';
 
 // 附近景点项接口定义
 interface NearbySpotItem {
@@ -18,7 +19,7 @@ interface NearbySpotItem {
   rating: number;
   category: string; // 景点类别
   openTime: string; // 开放时间
-  price: string;    // 价格信息（如："免费"、"¥50"）
+  price: string;    // 价格信息（如："免费"、"¥50"")
 }
 
 // 排序方式类型
@@ -69,10 +70,15 @@ struct NearbyPage {
   // 加载状态
   @State isLoading: boolean = false;
   @State isRefreshing: boolean = false;
+  @State apiFailed: boolean = false; // API调用失败标记
 
   // 当前位置（假数据）
   @State currentLocation: string = '当前位置';
   @State currentAddress: string = 'XX市XX区XX路123号';
+
+  // 经纬度常量
+  private latitude: number = 23.112233;
+  private longitude: number = 113.332211;
 
   // 生命周期：页面显示时
   aboutToAppear() {
@@ -80,21 +86,165 @@ struct NearbyPage {
     this.loadNearbyData();
   }
 
-  // 加载附近景点数据（使用假数据）
-  private loadNearbyData() {
+  // 加载附近景点数据（优先调用接口）
+  private async loadNearbyData() {
     this.isLoading = true;
+    this.apiFailed = false;
 
+    console.log('开始加载附近推荐数据...');
+
+    try {
+      // 先尝试调用接口获取数据
+      const response = await getNearbyRecommendations({
+        latitude: this.latitude,
+        longitude: this.longitude,
+        sort: this.mapSortTypeToApi(this.currentSort),
+        type: 'spot'
+      });
+
+      if (response && response.code === 200 && response.data && response.data.list) {
+        console.log('✅ 接口调用成功，获取到', response.data.list.length, '个推荐项');
+        this.processApiData(response.data.list);
+        this.isLoading = false;
+        this.isRefreshing = false;
+        return;
+      } else {
+        console.warn('接口返回数据异常，使用假数据');
+        this.apiFailed = true;
+      }
+    } catch (error) {
+      console.error('接口调用失败:', error);
+      this.apiFailed = true;
+    }
+
+    // 如果接口调用失败，使用假数据
+    console.log('使用假数据');
+    this.useMockData();
+  }
+
+  // 处理API返回的数据
+  // 处理API返回的数据
+  private processApiData(apiItems: NearbyItem[]) {
+    console.log('处理API数据:', apiItems);
+
+    // 将API数据转换为页面需要的数据格式
+    const convertedSpots: NearbySpotItem[] = apiItems.map((item, index) => {
+      // 这里需要根据API返回的数据结构进行映射
+      // 由于API返回的字段可能与页面需要的不完全一致，这里做适配转换
+
+      // 生成一些模拟数据来填充API可能缺少的字段
+      const categories = ['自然风光', '历史文化', '休闲娱乐', '美食购物', '亲子家庭'];
+      const category = categories[index % categories.length];
+
+      const isRecommended = index % 3 === 0; // 每3个有一个推荐
+
+      // 将米转换为公里
+      const distanceInKm = item.distance / 1000;
+
+      // 明确创建符合 NearbySpotItem 接口的对象
+      const spotItem: NearbySpotItem = {
+        spotId: item.id || index + 1,
+        name: item.name || `景点${index + 1}`,
+        description: this.generateDescription(category),
+        images: item.thumbnail ? [item.thumbnail] : [],
+        zoneId: index + 1,
+        zoneName: this.getZoneName(category),
+        coverImage: item.thumbnail || this.getDefaultImage(category),
+        distance: distanceInKm,
+        distanceText: this.formatDistance(distanceInKm),
+        isRecommended: isRecommended,
+        visitedCount: Math.floor(item.popularity * 100) || 500 + index * 100,
+        rating: 4.0 + (item.popularity * 0.5) || 4.0 + (index * 0.1),
+        category: category,
+        openTime: '09:00-17:00',
+        price: index % 2 === 0 ? '免费' : '¥' + (20 + index * 10)
+      };
+
+      return spotItem;
+    });
+
+    // 根据当前排序方式排序
+    const sortedSpots = this.sortSpots(convertedSpots, this.currentSort);
+
+    // 根据当前筛选类别筛选
+    if (this.currentFilter !== '全部') {
+      this.nearbySpots = sortedSpots.filter(spot => spot.category === this.currentFilter);
+    } else {
+      this.nearbySpots = sortedSpots;
+    }
+
+    console.log('数据转换完成，共', this.nearbySpots.length, '个景点');
+  }
+
+  // 使用假数据
+  private useMockData() {
     // 模拟网络请求延迟
     setTimeout(() => {
       // 生成假数据
       this.generateMockData();
       this.isLoading = false;
       this.isRefreshing = false;
-      console.log('✅ 加载附近景点数据成功');
+      console.log('✅ 使用假数据加载成功');
     }, 800);
   }
 
-  // 生成假数据
+  // 生成描述
+  private generateDescription(category: string): string {
+    const descriptions: Record<string, string> = {
+      '自然风光': '优美的自然景观，让人心旷神怡，流连忘返。',
+      '历史文化': '具有深厚历史文化底蕴的景点，值得细细品味。',
+      '休闲娱乐': '适合放松身心，享受休闲时光的好去处。',
+      '美食购物': '美食与购物的天堂，满足您的味蕾和购物欲。',
+      '亲子家庭': '适合全家出游，让孩子在玩耍中学习成长。'
+    };
+    return descriptions[category] || '一个值得一游的景点。';
+  }
+
+  // 获取区域名称
+  private getZoneName(category: string): string {
+    const zoneNames: Record<string, string> = {
+      '自然风光': '生态体验区',
+      '历史文化': '历史文化区',
+      '休闲娱乐': '休闲娱乐区',
+      '美食购物': '美食购物区',
+      '亲子家庭': '亲子乐园区'
+    };
+    return zoneNames[category] || '综合体验区';
+  }
+
+  // 获取默认图片
+  private getDefaultImage(category: string): string {
+    const defaultImages: Record<string, string> = {
+      '自然风光': 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&auto=format&fit=crop',
+      '历史文化': 'https://images.unsplash.com/photo-1542728928-0013d5f8d5b5?w-400&auto=format&fit=crop',
+      '休闲娱乐': 'https://images.unsplash.com/photo-1516937941344-00b4e0337589?w=400&auto=format&fit=crop',
+      '美食购物': 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&auto=format&fit=crop',
+      '亲子家庭': 'https://images.unsplash.com/photo-1516937941344-00b4e0337589?w=400&auto=format&fit=crop'
+    };
+    return defaultImages[category] || 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&auto=format&fit=crop';
+  }
+
+  // 格式化距离
+  private formatDistance(distanceInKm: number): string {
+    if (distanceInKm < 1) {
+      return Math.round(distanceInKm * 1000) + 'm';
+    } else {
+      return distanceInKm.toFixed(1) + 'km';
+    }
+  }
+
+  // 映射排序类型到API参数
+  private mapSortTypeToApi(sortType: SortType): string {
+    const mapping: Record<SortType, string> = {
+      'distance': 'distance',
+      'rating': 'popularity', // 假设评分对应热度
+      'popular': 'popularity',
+      'recommended': 'popularity' // 推荐也使用热度
+    };
+    return mapping[sortType] || 'popularity';
+  }
+
+  // 生成假数据（保留原有的假数据生成逻辑）
   private generateMockData() {
     // 明确声明数组类型
     const baseSpots: Array<NearbySpotItem> = [
@@ -270,7 +420,7 @@ struct NearbyPage {
   }
 
   // 切换排序方式
-  private changeSortType(sortType: SortType) {
+  private async changeSortType(sortType: SortType) {
     if (this.currentSort === sortType) {
       return;
     }
@@ -278,16 +428,42 @@ struct NearbyPage {
     this.currentSort = sortType;
     this.isLoading = true;
 
-    // 模拟排序处理
-    setTimeout(() => {
+    // 如果API之前失败了，直接使用假数据
+    if (this.apiFailed) {
+      setTimeout(() => {
+        this.nearbySpots = this.sortSpots(this.nearbySpots, sortType);
+        this.isLoading = false;
+        console.log(`✅ 按${this.getSortLabel(sortType)}排序完成`);
+      }, 500);
+      return;
+    }
+
+    // 否则尝试重新调用API
+    try {
+      const response = await getNearbyRecommendations({
+        latitude: this.latitude,
+        longitude: this.longitude,
+        sort: this.mapSortTypeToApi(sortType),
+        type: 'spot'
+      });
+
+      if (response && response.code === 200 && response.data && response.data.list) {
+        console.log('✅ 排序接口调用成功');
+        this.processApiData(response.data.list);
+      } else {
+        console.warn('排序接口调用失败，使用本地排序');
+        this.nearbySpots = this.sortSpots(this.nearbySpots, sortType);
+      }
+    } catch (error) {
+      console.error('排序接口调用异常，使用本地排序:', error);
       this.nearbySpots = this.sortSpots(this.nearbySpots, sortType);
+    } finally {
       this.isLoading = false;
-      console.log(`✅ 按${this.getSortLabel(sortType)}排序完成`);
-    }, 500);
+    }
   }
 
   // 切换筛选类别
-  private changeFilterCategory(category: string) {
+  private async changeFilterCategory(category: string) {
     if (this.currentFilter === category) {
       return;
     }
@@ -295,12 +471,38 @@ struct NearbyPage {
     this.currentFilter = category;
     this.isLoading = true;
 
-    // 模拟筛选处理
-    setTimeout(() => {
-      this.generateMockData(); // 重新生成数据应用筛选
+    // 如果API之前失败了，直接使用假数据
+    if (this.apiFailed) {
+      setTimeout(() => {
+        this.generateMockData(); // 重新生成数据应用筛选
+        this.isLoading = false;
+        console.log(`✅ 筛选类别: ${category}`);
+      }, 500);
+      return;
+    }
+
+    // 否则尝试重新调用API
+    try {
+      const response = await getNearbyRecommendations({
+        latitude: this.latitude,
+        longitude: this.longitude,
+        sort: this.mapSortTypeToApi(this.currentSort),
+        type: 'spot'
+      });
+
+      if (response && response.code === 200 && response.data && response.data.list) {
+        console.log('✅ 筛选接口调用成功');
+        this.processApiData(response.data.list);
+      } else {
+        console.warn('筛选接口调用失败，使用本地数据');
+        this.generateMockData();
+      }
+    } catch (error) {
+      console.error('筛选接口调用异常，使用本地数据:', error);
+      this.generateMockData();
+    } finally {
       this.isLoading = false;
-      console.log(`✅ 筛选类别: ${category}`);
-    }, 500);
+    }
   }
 
   // 获取排序方式标签
@@ -320,6 +522,39 @@ struct NearbyPage {
     if (distance < 1) return '#34C759';      // 绿色：1km以内
     if (distance < 3) return '#FF9500';      // 橙色：1-3km
     return '#FF3B30';                        // 红色：3km以上
+  }
+
+  // 构建API失败提示
+  @Builder
+  buildApiFailNotice() {
+    if (this.apiFailed && !this.isLoading) {
+      Row({ space: 8 }) {
+        Text('⚠️')
+          .fontSize(14)
+          .fontColor('#FF9500')
+
+        Text('接口调用失败，已显示模拟数据')
+          .fontSize(12)
+          .fontColor('#666666')
+          .layoutWeight(1)
+
+        Button('重试')
+          .fontSize(12)
+          .backgroundColor('#007AFF10')
+          .borderRadius(8)
+          .padding({ left: 8, right: 8 })
+          .height(24)
+          .onClick(() => {
+            console.log('点击重试接口');
+            this.loadNearbyData();
+          })
+      }
+      .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+      .backgroundColor('#FFF8E6')
+      .borderRadius(8)
+      .margin({ left: 16, right: 16, top: 8 })
+      .shadow({ radius: 2, color: '#00000004' })
+    }
   }
 
   // 构建顶部位置信息卡片
@@ -349,13 +584,13 @@ struct NearbyPage {
 
         Button('刷新位置')
           .backgroundColor('#007AFF10')
-        .borderRadius(12)
-        .padding({ left: 12, right: 12 })
-        .height(28)
-        .onClick(() => {
-          console.log('点击刷新位置');
-          this.refreshData();
-        })
+          .borderRadius(12)
+          .padding({ left: 12, right: 12 })
+          .height(28)
+          .onClick(() => {
+            console.log('点击刷新位置');
+            this.refreshData();
+          })
       }
       .width('100%')
 
@@ -566,6 +801,9 @@ struct NearbyPage {
   @Builder
   buildSpotsList() {
     Column() {
+      // API失败提示
+      this.buildApiFailNotice()
+
       // 列表标题
       Row({ space: 8 }) {
         Text('附近景点')
@@ -611,13 +849,13 @@ struct NearbyPage {
 
           Button('刷新位置')
             .backgroundColor('#007AFF')
-          .borderRadius(8)
-          .width(120)
-          .height(36)
-          .margin({ top: 8 })
-          .onClick(() => {
-            this.refreshData();
-          })
+            .borderRadius(8)
+            .width(120)
+            .height(36)
+            .margin({ top: 8 })
+            .onClick(() => {
+              this.refreshData();
+            })
         }
         .width('100%')
         .padding(40)

@@ -49,11 +49,11 @@ export async function getCheckInSpots(data:GetReq): Promise<GetCheckInData[] | v
         return ;  // 返回空JSON对象字符串
       }
     } else {
-      console.log("请求失败，状态码:", response.responseCode);
+      console.log("getCheckInSpots请求失败，状态码:", response.responseCode);
       return;
     }
   } catch (error) {
-    console.error('请求异常:', error);
+    console.error('getCheckInSpots请求异常:', error);
     return ;
   } finally {
     // 确保销毁请求对象
@@ -81,7 +81,51 @@ export interface SubmitRes{
   data:SubmitResData;
 }
 
-export async function Submit(data:SubmitReq): Promise<void> {
+// export async function Submit(data:SubmitReq): Promise<void> {
+//   let request = http.createHttp();
+//   try {
+//     const token = await StorageUtil.getToken();
+//     if (!token) {
+//       console.warn('未找到token，请先登录');
+//       return;
+//     }
+//     const response = await request.request(
+//       "http://10.54.35.223:8080/checkin/submit",  // 注意：http:// 不是 https://
+//       {
+//         method: http.RequestMethod.GET,
+//         header: {
+//           'Content-Type': 'application/json',
+//           'Authorization': `Bearer ${token}`
+//         },
+//         extraData:data
+//       }
+//     );
+//     if (response.responseCode === 200) {
+//       console.log("Submit请求成功");
+//       console.log(String(response.result));
+//       // 安全地获取结果
+//       if (response.result) {
+//         const str = String(response.result);
+//         const responseData: SubmitRes = JSON.parse(str);
+//         //return responseData.data;// 返回
+//       } else {
+//         console.warn('响应结果为空');
+//         return ;  // 返回空JSON对象字符串
+//       }
+//     } else {
+//       console.log("submit请求失败，状态码:", response.responseCode);
+//       return;
+//     }
+//   } catch (error) {
+//     console.error('submit请求异常:', error);
+//     return ;
+//   } finally {
+//     // 确保销毁请求对象
+//     request.destroy();
+//   }
+// }
+
+export async function Submit(data:SubmitReq): Promise<SubmitResData | void> {
   let request = http.createHttp();
   try {
     const token = await StorageUtil.getToken();
@@ -89,38 +133,50 @@ export async function Submit(data:SubmitReq): Promise<void> {
       console.warn('未找到token，请先登录');
       return;
     }
+    console.log("[DEBUG] 获取到的Token:", token);
+
+    console.log("[DEBUG] Submit 请求数据:", data);
+    console.log("[DEBUG] Submit 请求URL:", "http://10.54.35.223:8080/checkin/submit");
+
     const response = await request.request(
-      "http://10.54.35.223:8080/checkin/submit",  // 注意：http:// 不是 https://
+      "http://10.54.35.223:8080/checkin/submit",
       {
-        method: http.RequestMethod.GET,
+        method: http.RequestMethod.POST,  // 关键修改
         header: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'token': token  // 同时发送 token 头
         },
-        extraData:data
+        extraData: JSON.stringify(data)  // POST 请求体数据
       }
     );
+
+    console.log("[DEBUG] Submit 响应状态码:", response.responseCode);
+    console.log("[DEBUG] Submit 响应头:", response.header);
+
     if (response.responseCode === 200) {
       console.log("Submit请求成功");
-      console.log(String(response.result));
-      // 安全地获取结果
       if (response.result) {
         const str = String(response.result);
+        console.log("[DEBUG] Submit 原始响应:", str.substring(0, 300));
         const responseData: SubmitRes = JSON.parse(str);
-        //return responseData.data;// 返回
+        return responseData.data;  // 返回数据
       } else {
         console.warn('响应结果为空');
-        return ;  // 返回空JSON对象字符串
+        return;
       }
     } else {
-      console.log("请求失败，状态码:", response.responseCode);
+      console.log("submit请求失败，状态码:", response.responseCode);
+      if (response.result) {
+        console.log("错误响应:", String(response.result));
+      }
       return;
     }
   } catch (error) {
-    console.error('请求异常:', error);
-    return ;
+    console.error('submit请求异常:', error);
+    console.error('异常详情:', error.message);
+    return;
   } finally {
-    // 确保销毁请求对象
     request.destroy();
   }
 }
