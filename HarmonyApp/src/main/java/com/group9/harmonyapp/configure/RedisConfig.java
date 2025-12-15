@@ -2,10 +2,11 @@ package com.group9.harmonyapp.configure;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.serializer.*;
 
 @Configuration
 public class RedisConfig {
@@ -26,5 +27,26 @@ public class RedisConfig {
 
         template.afterPropertiesSet();
         return template;
+    }
+    @Bean
+    public RedisCacheManager redisCacheManager(RedisConnectionFactory factory) {
+
+        RedisSerializer<Object> jsonSerializer =
+                new GenericJackson2JsonRedisSerializer();
+
+        RedisCacheConfiguration config =
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .serializeKeysWith(
+                                RedisSerializationContext.SerializationPair
+                                        .fromSerializer(new StringRedisSerializer())
+                        )
+                        .serializeValuesWith(
+                                RedisSerializationContext.SerializationPair
+                                        .fromSerializer(jsonSerializer)
+                        );
+
+        return RedisCacheManager.builder(factory)
+                .cacheDefaults(config)
+                .build();
     }
 }
