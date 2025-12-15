@@ -6,7 +6,16 @@
     "pages/AssistantPage",
     "pages/LoginPage",
     "pages/RegisterPage",
+    "pages/ZoneListPage",
+    "pages/SpotListPage",
+    "pages/SpotDetailPage",
     "pages/DiscoverPage",
-    "pages/EditProfilePage"
+    "pages/FeedListPage",
+    "pages/EditProfilePage",
+    "pages/PointsDetailPage",
+    "pages/CheckinDetailPage",
+    "pages/GiftsDetailPage",
+    "pages/RankingPage",
+    "pages/NearbyPage"
   ]
 }

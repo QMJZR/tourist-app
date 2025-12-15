@@ -35,7 +35,7 @@ export default struct DiscoverPage {
   ];
 
   // 其他发现功能（可后续扩展）
-  @State otherFunctions: DiscoverFunctionItem[] = [
+  @State otherFunctions: Array<DiscoverFunctionItem> = [
     {
       id: 'nearby',
       icon: '📍',
@@ -214,7 +214,7 @@ export default struct DiscoverPage {
         this.onFeedsClick();
         break;
       case 'nearby':
-        this.onNearbyClick();
+        this.onNearbyClick();  // 调用附近推荐点击方法
         break;
     }
 
@@ -235,16 +235,22 @@ export default struct DiscoverPage {
   // 排行榜点击
   private onRankingClick(): void {
     console.log('点击排行榜');
+    router.pushUrl({
+      url:"pages/RankingPage"
+    })
   }
 
   // 动态点击
   private onFeedsClick(): void {
     console.log('点击动态');
+    router.pushUrl({
+      url:"pages/FeedListPage"
+    })
   }
 
   // 附近推荐点击
   private onNearbyClick(): void {
-    console.log('点击附近推荐');
+    console.log('点击附近推荐，跳转到附近推荐页面');
   }
 
   // ==================== 生命周期方法 ====================
