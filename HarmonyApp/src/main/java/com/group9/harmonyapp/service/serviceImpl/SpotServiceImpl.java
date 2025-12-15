@@ -47,7 +47,8 @@ public class SpotServiceImpl implements SpotService {
             int total = dtoList.size();
             int from = Math.max(0, (page - 1) * pageSize);
             int to = Math.min(total, from + pageSize);
-            List<SpotListItemDTO> pageList = dtoList.subList(from, to);
+            //List<SpotListItemDTO> pageList = dtoList.subList(from, to);
+            List<SpotListItemDTO> pageList = new ArrayList<>(dtoList.subList(from, to));
 
             PageResponseDTO<SpotListItemDTO> data = new PageResponseDTO<>();
             data.setList(pageList);
