@@ -1,5 +1,6 @@
 import { http } from "@kit.NetworkKit"
 import StorageUtil from "../utils/Storage"
+
 // ==================== 获取动态列表 ====================
 
 // 请求参数接口
@@ -11,7 +12,7 @@ export interface FeedsParams {
   keyword?: string;
 }
 
-// 动态项接口
+// 动态项接口 - 根据后端 FeedResponseDTO
 export interface FeedItem {
   feedId: number;
   userId: number;
@@ -25,30 +26,35 @@ export interface FeedItem {
   createdAt: string;
 }
 
-// 动态列表响应接口
-interface FeedsResponseData {
-  list: FeedItem[];
+// 分页响应接口
+export interface PageResponse<T> {
+  list: T[];
   page: number;
   pageSize: number;
   total: number;
 }
 
+// 动态列表响应接口
 interface FeedsResponse {
   code: number;
   message: string;
-  data: FeedsResponseData;
+  data: PageResponse<FeedItem>;
 }
 
-export async function getFeeds(params?: FeedsParams): Promise<FeedItem[] | void> {
+// 获取动态列表
+export async function getFeeds(params?: FeedsParams): Promise<PageResponse<FeedItem> | void> {
   let request = http.createHttp();
   try {
-    // 构建查询参数
     const token = await StorageUtil.getToken();
     if(!token) {
-      console.log("无token")
+      console.log("无token，动态列表需要登录");
       return;
     }
-    let url = "http://10.54.35.223:8080/api/v1/feeds";
+    console.log('[DEBUG] Token:', token); // 查看token是否正常
+
+    // 修正路径：根据后端是 /feeds
+    let url = "http://10.54.35.223:8080/api/V1/feeds";
+
     if (params) {
       const queryParts: string[] = [];
 
@@ -63,29 +69,38 @@ export async function getFeeds(params?: FeedsParams): Promise<FeedItem[] | void>
       }
     }
 
+    console.log("[DEBUG] getFeeds 请求URL:", url);
+
     const response = await request.request(
       url,
       {
         method: http.RequestMethod.GET,
         header: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`, // 只需要 Authorization
+          'token':token
         }
       }
     );
+
+    console.log("[DEBUG] getFeeds 响应状态码:", response.responseCode);
 
     if (response.responseCode === 200) {
       console.log("getFeeds请求成功");
       if (response.result) {
         const str = String(response.result);
+        console.log("[DEBUG] getFeeds 原始响应:", str.substring(0, 300));
         const responseData: FeedsResponse = JSON.parse(str);
-        return responseData.data.list;
+        return responseData.data;
       } else {
         console.warn('getFeeds响应结果为空');
         return;
       }
     } else {
       console.log("getFeeds请求失败，状态码:", response.responseCode);
+      if (response.result) {
+        console.log("错误响应:", String(response.result));
+      }
       return;
     }
   } catch (error) {
@@ -99,7 +114,7 @@ export async function getFeeds(params?: FeedsParams): Promise<FeedItem[] | void>
 // ==================== 点赞动态 ====================
 
 // 点赞响应接口
-interface LikeResponseData {
+export interface LikeResponseData {
   feedId: number;
   likes: number;
   liked: boolean;
@@ -114,17 +129,30 @@ interface LikeResponse {
 export async function likeFeed(feedId: number): Promise<LikeResponseData | void> {
   let request = http.createHttp();
   try {
-    const url = `http://10.54.35.223:8080/api/v1/feeds/${feedId}/like`;
+    const token = await StorageUtil.getToken();
+    if(!token) {
+      console.warn('点赞需要登录，未找到token');
+      return;
+    }
+
+    // 修正路径：根据后端是 /feeds/{id}/like
+    const url = `http://10.54.35.223:8080/api/V1/feeds/${feedId}/like`;
+
+    console.log("[DEBUG] likeFeed 请求URL:", url);
 
     const response = await request.request(
       url,
       {
         method: http.RequestMethod.POST,
         header: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'token':token
         }
       }
     );
+
+    console.log("[DEBUG] likeFeed 响应状态码:", response.responseCode);
 
     if (response.responseCode === 200) {
       console.log("likeFeed请求成功");
@@ -138,6 +166,9 @@ export async function likeFeed(feedId: number): Promise<LikeResponseData | void>
       }
     } else {
       console.log("likeFeed请求失败，状态码:", response.responseCode);
+      if (response.result) {
+        console.log("错误响应:", String(response.result));
+      }
       return;
     }
   } catch (error) {
@@ -153,17 +184,30 @@ export async function likeFeed(feedId: number): Promise<LikeResponseData | void>
 export async function unlikeFeed(feedId: number): Promise<LikeResponseData | void> {
   let request = http.createHttp();
   try {
-    const url = `http://10.54.35.223:8080/api/v1/feeds/${feedId}/like`;
+    const token = await StorageUtil.getToken();
+    if(!token) {
+      console.warn('取消点赞需要登录，未找到token');
+      return;
+    }
+
+    // 修正路径：根据后端是 /feeds/{id}/like
+    const url = `http://10.54.35.223:8080/api/V1/feeds/${feedId}/like`;
+
+    console.log("[DEBUG] unlikeFeed 请求URL:", url);
 
     const response = await request.request(
       url,
       {
         method: http.RequestMethod.DELETE,
         header: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'token':token
         }
       }
     );
+
+    console.log("[DEBUG] unlikeFeed 响应状态码:", response.responseCode);
 
     if (response.responseCode === 200) {
       console.log("unlikeFeed请求成功");
@@ -177,6 +221,9 @@ export async function unlikeFeed(feedId: number): Promise<LikeResponseData | voi
       }
     } else {
       console.log("unlikeFeed请求失败，状态码:", response.responseCode);
+      if (response.result) {
+        console.log("错误响应:", String(response.result));
+      }
       return;
     }
   } catch (error) {

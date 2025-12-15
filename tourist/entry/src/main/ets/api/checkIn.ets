@@ -27,7 +27,7 @@ export async function getCheckInSpots(data:GetReq): Promise<GetCheckInData[] | v
   let request = http.createHttp();
   try {
     const response = await request.request(
-      "http://10.54.35.223:8080/checkin/spots",  // 注意：http:// 不是 https://
+      "http://10.54.35.223:8080/api/v1/checkin/spots",  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.GET,
         header: {
@@ -136,10 +136,10 @@ export async function Submit(data:SubmitReq): Promise<SubmitResData | void> {
     console.log("[DEBUG] 获取到的Token:", token);
 
     console.log("[DEBUG] Submit 请求数据:", data);
-    console.log("[DEBUG] Submit 请求URL:", "http://10.54.35.223:8080/checkin/submit");
+    console.log("[DEBUG] Submit 请求URL:", "http://10.54.35.223:8080/api/v1/checkin/submit");
 
     const response = await request.request(
-      "http://10.54.35.223:8080/checkin/submit",
+      "http://10.54.35.223:8080/api/v1/checkin/submit",
       {
         method: http.RequestMethod.POST,  // 关键修改
         header: {

@@ -1,9 +1,9 @@
-// entry/src/main/ets/pages/FeedsPage.ets
+// entry/src/main/ets/pages/FeedsListPage.ets
 import router from '@ohos.router';
-import { getFeeds, likeFeed, unlikeFeed, FeedItem, FeedsParams } from '../api/feeds';
+import { getFeeds, likeFeed, unlikeFeed, FeedItem, PageResponse, FeedsParams } from '../api/feeds';
 
-// 假数据
-const mockFeeds: FeedItem[] = [
+// 正确的假数据 - 基于 FeedItem 接口
+const mockFeedItems: FeedItem[] = [
   {
     feedId: 1001,
     userId: 2001,
@@ -11,7 +11,7 @@ const mockFeeds: FeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&auto=format&fit=crop',
     spotId: 301,
     spotName: '山顶观景台',
-    content: '今天打卡了山顶观景台，风景太美了！站在山顶俯瞰整个园区，心旷神怡。',
+    content: '今天打卡了山顶观景台，风景太美了！站在山顶俯瞰整个园区，心旷神怡。下次还要带家人一起来！',
     likes: 12,
     liked: false,
     createdAt: '2025-01-11 14:20:33'
@@ -23,7 +23,7 @@ const mockFeeds: FeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&auto=format&fit=crop',
     spotId: 302,
     spotName: '湖畔栈道',
-    content: '湖畔栈道的傍晚太美了，夕阳洒在湖面上，金色的波光粼粼。',
+    content: '湖畔栈道的傍晚太美了，夕阳洒在湖面上，金色的波光粼粼。拍了超多美照，分享给大家！',
     likes: 25,
     liked: true,
     createdAt: '2025-01-10 18:15:22'
@@ -35,7 +35,7 @@ const mockFeeds: FeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop',
     spotId: 303,
     spotName: '瀑布观景台',
-    content: '瀑布的水雾中看到了彩虹！太幸运了，分享几张照片给大家看看。',
+    content: '瀑布的水雾中看到了彩虹！太幸运了，分享几张照片给大家看看。摄影小贴士：早晨光线最佳。',
     likes: 42,
     liked: false,
     createdAt: '2025-01-09 10:05:18'
@@ -47,27 +47,53 @@ const mockFeeds: FeedItem[] = [
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&auto=format&fit=crop',
     spotId: 304,
     spotName: '花园广场',
-    content: '花园广场的花都开了，香气扑鼻，很适合放松心情。',
+    content: '花园广场的花都开了，香气扑鼻，很适合放松心情。周末来这里野餐是个不错的选择。',
     likes: 8,
     liked: false,
     createdAt: '2025-01-08 16:30:45'
+  },
+  {
+    feedId: 1005,
+    userId: 2005,
+    username: '背包客',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&auto=format&fit=crop',
+    spotId: 305,
+    spotName: '山间步道',
+    content: '走了三小时的山间步道，虽然累但是值得！沿途风景如画，空气清新，强烈推荐给喜欢徒步的朋友。',
+    likes: 18,
+    liked: true,
+    createdAt: '2025-01-07 09:45:12'
   }
 ];
 
+// 分页假数据
+const mockFeedsPageResponse: PageResponse<FeedItem> = {
+  list: mockFeedItems,
+  page: 1,
+  pageSize: 10,
+  total: 156
+};
+
 @Entry
 @Component
-export default struct FeedsPage {
+export default struct FeedsListPage {
   // 动态列表数据
-  @State feeds: FeedItem[] = [];
+  @State feedItems: FeedItem[] = [];
+
+  // 分页信息
+  @State pageInfo: PageResponse<FeedItem> | null = null;
 
   // 加载状态
   @State isLoading: boolean = true;
 
+  // 排序方式
+  @State sortBy: string = 'latest';
+
   // 当前页码
   @State currentPage: number = 1;
 
-  // 排序方式
-  @State sortBy: string = 'latest';
+  // 搜索关键词
+  @State searchKeyword: string = '';
 
   // 页面构建
   build() {
@@ -78,19 +104,24 @@ export default struct FeedsPage {
       // 筛选工具栏
       this.buildFilterToolbar()
 
-      // 动态列表
+      // 内容区域
       if (this.isLoading) {
         this.buildLoadingView()
-      } else if (this.feeds.length === 0) {
+      } else if (this.feedItems.length === 0) {
         this.buildEmptyView()
       } else {
         this.buildFeedsList()
+      }
+
+      // 分页控件
+      if (this.pageInfo && this.pageInfo.total > this.pageInfo.pageSize) {
+        this.buildPagination()
       }
     }
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F7FA')
-    .padding({ bottom: 60 }) // 为底部Tabs预留空间
+    .padding({ bottom: 60 })
   }
 
   // ==================== 顶部导航栏 ====================
@@ -138,7 +169,39 @@ export default struct FeedsPage {
   @Builder
   buildFilterToolbar() {
     Column() {
-      // 排序选项
+      // 搜索框
+      Row({ space: 10 }) {
+        TextInput({ text: this.searchKeyword, placeholder: '搜索动态内容' })
+          .placeholderColor('#999999')
+          .caretColor('#007AFF')
+          .fontColor('#333333')
+          .fontSize(14)
+          .height(40)
+          .backgroundColor(Color.White)
+          .border({ width: 1, color: '#E0E0E0' })
+          .borderRadius(8)
+          .padding({ left: 12, right: 12 })
+          .layoutWeight(1)
+          .onChange((value: string) => {
+            this.searchKeyword = value;
+          })
+
+        Button('搜索')
+          .fontSize(14)
+          .fontColor(Color.White)
+          .backgroundColor('#007AFF')
+          .height(40)
+          .borderRadius(8)
+          .padding({ left: 16, right: 16 })
+          .onClick(() => {
+            this.currentPage = 1;
+            this.loadFeeds();
+          })
+      }
+      .width('100%')
+      .padding({ left: 15, right: 15, top: 10, bottom: 10 })
+
+      // 排序选项和统计信息
       Row({ space: 10 }) {
         Button(this.sortBy === 'latest' ? '最新 ✓' : '最新')
           .fontSize(14)
@@ -162,18 +225,19 @@ export default struct FeedsPage {
             this.changeSort('popular');
           })
 
-        // 状态显示
-        Text(`共 ${this.feeds.length} 条动态`)
-          .fontSize(14)
-          .fontColor('#666666')
-          .layoutWeight(1)
-          .textAlign(TextAlign.End)
+        // 统计信息
+        if (this.pageInfo) {
+          Text(`共 ${this.pageInfo.total} 条动态`)
+            .fontSize(14)
+            .fontColor('#666666')
+            .layoutWeight(1)
+            .textAlign(TextAlign.End)
+        }
       }
       .width('100%')
       .padding({ left: 15, right: 15 })
     }
     .width('100%')
-    .padding({ top: 10, bottom: 10 })
     .backgroundColor(Color.White)
     .margin({ top: 2 })
   }
@@ -217,7 +281,7 @@ export default struct FeedsPage {
   @Builder
   buildFeedsList() {
     List({ space: 10 }) {
-      ForEach(this.feeds, (feed: FeedItem) => {
+      ForEach(this.feedItems, (feed: FeedItem) => {
         ListItem() {
           this.buildFeedCard(feed)
         }
@@ -284,12 +348,13 @@ export default struct FeedsPage {
       Row() {
         // 点赞按钮
         Row({ space: 5 }) {
-          Button(feed.liked ? '♥' : '👍')
-            .fontSize(8)
+          Button(feed.liked ? '已赞' : '点赞')
+            .fontSize(14)
             .fontColor(feed.liked ? '#FF3B30' : '#666666')
             .backgroundColor(Color.Transparent)
-            .width(40)
-            .height(40)
+            .height(36)
+            .borderRadius(18)
+            .padding({ left: 12, right: 12 })
             .onClick(() => {
               this.toggleLike(feed);
             })
@@ -299,15 +364,15 @@ export default struct FeedsPage {
             .fontColor(feed.liked ? '#FF3B30' : '#666666')
         }
 
-        // 查看详情按钮  不可以查看
-        // Button('查看详情 →')
-        //   .fontSize(14)
-        //   .fontColor('#007AFF')
-        //   .backgroundColor(Color.Transparent)
-        //   .layoutWeight(1)
-        //   .onClick(() => {
-        //     this.viewFeedDetail(feed.feedId);
-        //   })
+        // 查看详情按钮
+        Button('查看详情 →')
+          .fontSize(14)
+          .fontColor('#007AFF')
+          .backgroundColor(Color.Transparent)
+          .layoutWeight(1)
+          .onClick(() => {
+            this.viewFeedDetail(feed.feedId);
+          })
       }
       .width('100%')
       .padding({ top: 12, bottom: 12, left: 12, right: 12 })
@@ -319,11 +384,67 @@ export default struct FeedsPage {
     .shadow({ radius: 4, color: '#0000000A' })
   }
 
+  // ==================== 分页控件 ====================
+  @Builder
+  buildPagination() {
+    Column() {
+      Row({ space: 10 }) {
+        // 上一页按钮
+        Button('上一页')
+          .fontSize(14)
+          .fontColor(this.currentPage > 1 ? '#007AFF' : '#999999')
+          .backgroundColor(Color.Transparent)
+          .enabled(this.currentPage > 1)
+          .onClick(() => {
+            if (this.currentPage > 1) {
+              this.currentPage--;
+              this.loadFeeds();
+            }
+          })
+
+        // 页码显示
+        if (this.pageInfo) {
+          Text(`${this.currentPage} / ${this.calculateTotalPages()}`)
+            .fontSize(14)
+            .fontColor('#666666')
+        }
+
+        // 下一页按钮
+        Button('下一页')
+          .fontSize(14)
+          .fontColor(this.pageInfo && this.currentPage < this.calculateTotalPages() ? '#007AFF' : '#999999')
+          .backgroundColor(Color.Transparent)
+          .enabled(this.pageInfo && this.currentPage < this.calculateTotalPages())
+          .onClick(() => {
+            if (this.pageInfo && this.currentPage < this.calculateTotalPages()) {
+              this.currentPage++;
+              this.loadFeeds();
+            }
+          })
+      }
+      .width('100%')
+      .padding({ left: 15, right: 15 })
+    }
+    .width('100%')
+    .padding({ top: 10, bottom: 10 })
+    .backgroundColor(Color.White)
+    .margin({ top: 2 })
+  }
+
   // ==================== 交互方法 ====================
+
+  // 计算总页数的方法
+  private calculateTotalPages(): number {
+    if (this.pageInfo) {
+      return Math.ceil(this.pageInfo.total / this.pageInfo.pageSize);
+    }
+    return 1;
+  }
 
   // 切换排序方式
   private changeSort(sortType: string) {
     this.sortBy = sortType;
+    this.currentPage = 1;
     this.loadFeeds();
   }
 
@@ -342,7 +463,8 @@ export default struct FeedsPage {
       if (diffHours < 24) return `${diffHours}小时前`;
       if (diffDays < 7) return `${diffDays}天前`;
 
-      return dateString.substring(0, 10);
+      // 返回日期格式
+      return dateString.substring(0, 10).replace(/-/g, '/');
     } catch (e) {
       return dateString;
     }
@@ -356,7 +478,7 @@ export default struct FeedsPage {
     // 立即更新UI
     feed.liked = !feed.liked;
     feed.likes = feed.liked ? feed.likes + 1 : Math.max(0, feed.likes - 1);
-    this.feeds = [...this.feeds]; // 触发重新渲染
+    this.feedItems = [...this.feedItems]; // 触发重新渲染
 
     try {
       if (feed.liked) {
@@ -364,22 +486,30 @@ export default struct FeedsPage {
         const result = await likeFeed(feed.feedId);
         if (result) {
           console.log('点赞成功:', result);
+          // 更新数据
+          feed.likes = result.likes;
+          feed.liked = result.liked;
+          this.feedItems = [...this.feedItems];
         } else {
           // 如果请求失败，恢复原状态
           feed.liked = originalLiked;
           feed.likes = originalLikes;
-          this.feeds = [...this.feeds];
+          this.feedItems = [...this.feedItems];
         }
       } else {
         // 取消点赞
         const result = await unlikeFeed(feed.feedId);
         if (result) {
           console.log('取消点赞成功:', result);
+          // 更新数据
+          feed.likes = result.likes;
+          feed.liked = result.liked;
+          this.feedItems = [...this.feedItems];
         } else {
           // 如果请求失败，恢复原状态
           feed.liked = originalLiked;
           feed.likes = originalLikes;
-          this.feeds = [...this.feeds];
+          this.feedItems = [...this.feedItems];
         }
       }
     } catch (error) {
@@ -387,7 +517,7 @@ export default struct FeedsPage {
       // 恢复原状态
       feed.liked = originalLiked;
       feed.likes = originalLikes;
-      this.feeds = [...this.feeds];
+      this.feedItems = [...this.feedItems];
     }
   }
 
@@ -395,56 +525,67 @@ export default struct FeedsPage {
   private viewFeedDetail(feedId: number) {
     console.log('查看动态详情:', feedId);
     // TODO: 跳转到动态详情页面
+    // router.push({
+    //   url: 'pages/FeedDetailPage',
+    //   params: { feedId }
+    // });
   }
 
   // 发布动态
   private onPublish() {
     console.log('发布动态');
     // TODO: 跳转到发布页面
+    // router.push({
+    //   url: 'pages/PublishFeedPage'
+    // });
   }
 
   // ==================== 生命周期方法 ====================
 
   aboutToAppear() {
-    console.log('动态页面显示');
+    console.log('动态列表页面显示');
     this.loadFeeds();
   }
 
   // 加载动态数据
   private async loadFeeds() {
-    console.log('开始加载动态数据...');
+    console.log('开始加载动态数据，页码:', this.currentPage, '排序:', this.sortBy);
     this.isLoading = true;
 
-    this.feeds = [...mockFeeds];
+    try {
+      // 指定 params 的类型为 FeedsParams
+      const params: FeedsParams = {
+        page: this.currentPage,
+        pageSize: 10,
+        sort: this.sortBy,
+        keyword: this.searchKeyword || undefined
+      };
 
-    this.isLoading = false;
-    // 调用API获取动态列表
-    // const params: FeedsParams = {
-    //   page: this.currentPage,
-    //   pageSize: 10,
-    //   sort: this.sortBy
-    // };
-    //
-    // try {
-    //   const result = await getFeeds(params);
-    //   if (result && result.length > 0) {
-    //     this.feeds = result;
-    //     console.log('动态数据加载成功，共', result.length, '条');
-    //   } else {
-    //     // 如果API返回空，使用假数据
-    //     console.log('API返回空数据，使用假数据');
-    //     this.feeds = [...mockFeeds];
-    //   }
-    // } catch (error) {
-    //   console.error('加载动态数据失败:', error);
-    //   // 使用假数据
-    //   this.feeds = [...mockFeeds];
-    // } finally {
-    //   this.isLoading = false;
-    // }
+      const result = await getFeeds(params);
+      if (result) {
+        this.pageInfo = result;
+        this.feedItems = result.list;
+        console.log('动态数据加载成功，共', result.total, '条动态，当前页', result.list.length, '条');
+        // for test ,use false data
+        this.pageInfo = mockFeedsPageResponse;
+        this.feedItems = mockFeedItems;
+      } else {
+        // 如果API返回空，使用假数据
+        console.log('API返回空数据，使用假数据');
+        this.pageInfo = mockFeedsPageResponse;
+        this.feedItems = mockFeedItems;
+      }
+    } catch (error) {
+      console.error('加载动态数据失败:', error);
+      // 使用假数据
+      this.pageInfo = mockFeedsPageResponse;
+      this.feedItems = mockFeedItems;
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   aboutToDisappear() {
-    console.log('动态页面即将消失');
+    console.log('动态列表页面即将消失');
   }
 }
