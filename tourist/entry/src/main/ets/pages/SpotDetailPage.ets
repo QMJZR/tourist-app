@@ -1,10 +1,9 @@
-import { getSpotDetail, SpotDetail} from '../api/zone';
-
 // entry/src/main/ets/pages/SpotDetailPage.ets
 import router from '@ohos.router';
+import { getSpotDetail, SpotDetail } from '../api/zone';
 
-// 假数据 - 根据你的文档字段
-const mockSpotDetail : SpotDetail = {
+// 正确的假数据 - 基于 SpotDetail 接口
+const mockSpotDetail: SpotDetail = {
   spotId: 101,
   name: '瀑布观景台',
   images: [
@@ -14,11 +13,11 @@ const mockSpotDetail : SpotDetail = {
     'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&auto=format&fit=crop'
   ],
   video: 'https://example.com/spot101_video.mp4',
-  description: '瀑布观景台是园区最壮观的自然景点之一，瀑布从百米高空倾泻而下，气势磅礴。清晨时分，阳光透过水雾形成美丽的彩虹，是摄影爱好者的绝佳取景地。观景台设有安全护栏和多处观景平台，游客可以近距离感受瀑布的震撼力。',
+  description: '瀑布观景台是园区最壮观的自然景点之一，瀑布从百米高空倾泻而下，气势磅礴。清晨时分，阳光透过水雾形成美丽的彩虹，是摄影爱好者的绝佳取景地。观景台设有安全护栏和多处观景平台，游客可以近距离感受瀑布的震撼力。\n\n建议游玩时间：1-2小时\n最佳观赏时间：早晨或傍晚\n注意事项：瀑布区域湿滑，请注意安全',
   zoneId: 1,
   latitude: 23.334450,
   longitude: 113.334001,
-  openTime: '08:00-18:00',
+  openTime: '08:00-18:00（夏季延时至19:00）'
 };
 
 interface RouterParam {
@@ -52,7 +51,7 @@ export default struct SpotDetailPage {
       // 1. 顶部导航栏
       this.buildNavigationBar()
 
-      // 2. 可滚动内容区域 - 使用flexGrow占据剩余空间
+      // 2. 可滚动内容区域
       Scroll() {
         Column() {
           // 所有内容卡片
@@ -61,26 +60,26 @@ export default struct SpotDetailPage {
           this.buildDescriptionCard()
           this.buildPracticalInfoCard()
           this.buildLocationCard()
-          this.buildTipsCard()
 
-          // 底部间距，为固定按钮留出空间
+          // 底部间距
           Row()
-            .height(80) // 这个高度要大于底部按钮的高度
+            .height(80)
             .width('100%')
         }
         .width('100%')
       }
       .width('100%')
-      .layoutWeight(1) // 关键：使用layoutWeight而不是flexGrow
+      .layoutWeight(1)
       .scrollBar(BarState.Off)
 
-      // 3. 底部操作栏 - 固定高度，不会被挤压
-      //this.buildBottomActionBar()
+      // 3. 底部操作栏
+      this.buildBottomActionBar()
     }
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F7FA')
   }
+
   // ==================== 顶部导航栏 ====================
   @Builder
   buildNavigationBar() {
@@ -123,23 +122,14 @@ export default struct SpotDetailPage {
   @Builder
   buildImageCarousel() {
     Stack() {
-      // 图片轮播 - 使用Swiper组件
+      // 图片轮播
       Swiper() {
-        // 直接使用多个Image作为SwiperItem
-        Image(this.spotDetail.images[0] || '')
-          .width('100%')
-          .height('100%')
-          .objectFit(ImageFit.Cover)
-
-        Image(this.spotDetail.images[1] || '')
-          .width('100%')
-          .height('100%')
-          .objectFit(ImageFit.Cover)
-
-        Image(this.spotDetail.images[2] || '')
-          .width('100%')
-          .height('100%')
-          .objectFit(ImageFit.Cover)
+        ForEach(this.spotDetail.images, (image: string, index: number) => {
+          Image(image)
+            .width('100%')
+            .height('100%')
+            .objectFit(ImageFit.Cover)
+        })
       }
       .loop(true)
       .autoPlay(true)
@@ -151,15 +141,31 @@ export default struct SpotDetailPage {
         this.currentImageIndex = index;
       })
 
+      // 图片指示器
+      Row({ space: 6 }) {
+        ForEach(this.spotDetail.images, (_: string, index: number) => {
+          Column()
+            .width(8)
+            .height(8)
+            .backgroundColor(index === this.currentImageIndex ? Color.White : '#FFFFFF80')
+            .borderRadius(4)
+        })
+      }
+      .margin({ bottom: 15 })
+      .align(Alignment.Bottom)
 
+      // 图片计数器
+      Text(`${this.currentImageIndex + 1}/${this.spotDetail.images.length}`)
+        .fontSize(12)
+        .fontColor(Color.White)
+        .backgroundColor('#00000080')
+        .borderRadius(10)
+        .padding({ left: 8, right: 8, top: 4, bottom: 4 })
+        .margin({ right: 15, bottom: 15 })
+        .align(Alignment.BottomEnd)
     }
     .width('100%')
     .height(300)
-  }
-  // 轮播图指示器
-  @Builder
-  buildCarouselIndicator() {
-    // 使用默认指示器
   }
 
   // ==================== 基本信息卡片 ====================
@@ -175,7 +181,7 @@ export default struct SpotDetailPage {
           .layoutWeight(1)
 
         // 收藏按钮
-        Button(this.isCollected ? '❤️ 已收藏' : '🤍 收藏')
+        Button(this.isCollected ? '已收藏' : '收藏')
           .fontSize(14)
           .fontColor(this.isCollected ? '#FF3B30' : '#666666')
           .backgroundColor(this.isCollected ? '#FF3B3010' : '#F5F7FA')
@@ -188,40 +194,29 @@ export default struct SpotDetailPage {
       }
       .width('100%')
 
-      // 评分和开放时间
-      Row({ space: 15 }) {
-        // 评分
-        Row({ space: 5 }) {
-          Text('⭐')
-            .fontSize(16)
-          Text('4.8')
-            .fontSize(16)
-            .fontColor('#1A1A1A')
-            .fontWeight(FontWeight.Medium)
-        }
-
-        // 分割线
-        Text('|')
-          .fontSize(16)
-          .fontColor('#E0E0E0')
-
-        // 开放时间
-        Row({ space: 5 }) {
-          Text('🕐')
-            .fontSize(16)
-          Text(this.spotDetail.openTime)
-            .fontSize(16)
-            .fontColor('#1A1A1A')
-        }
-
-        // 分割线
-        Text('|')
-          .fontSize(16)
-          .fontColor('#E0E0E0')
-
-
+      // 所属区域
+      Row({ space: 5 }) {
+        // Image($r('app.media.ic_zone'))
+        //   .width(16)
+        //   .height(16)
+        Text(`区域 ${this.spotDetail.zoneId}`)
+          .fontSize(14)
+          .fontColor('#666666')
       }
       .width('100%')
+      .justifyContent(FlexAlign.Start)
+
+      // 开放时间
+      Row({ space: 5 }) {
+        // Image($r('app.media.ic_time'))
+        //   .width(16)
+        //   .height(16)
+        Text(this.spotDetail.openTime)
+          .fontSize(14)
+          .fontColor('#666666')
+      }
+      .width('100%')
+      .justifyContent(FlexAlign.Start)
     }
     .width('90%')
     .backgroundColor(Color.White)
@@ -301,23 +296,29 @@ export default struct SpotDetailPage {
 
       // 信息列表
       Column({ space: 10 }) {
-
-
-        // 详细地址
+        // 图片数量
         Row() {
-          Text('📍')
-            .fontSize(16)
-            .margin({ right: 10 })
-          Text('详细地址')
+          Text('图片数量')
             .fontSize(15)
             .fontColor('#666666')
             .layoutWeight(1)
-          Text('暂无')
+          Text(`${this.spotDetail.images.length}张`)
             .fontSize(15)
             .fontColor('#1A1A1A')
             .fontWeight(FontWeight.Medium)
-            .maxLines(2)
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
+        }
+        .width('100%')
+
+        // 视频资源
+        Row() {
+          Text('视频资源')
+            .fontSize(15)
+            .fontColor('#666666')
+            .layoutWeight(1)
+          Text(this.spotDetail.video ? '有' : '无')
+            .fontSize(15)
+            .fontColor(this.spotDetail.video ? '#34C759' : '#666666')
+            .fontWeight(FontWeight.Medium)
         }
         .width('100%')
       }
@@ -353,36 +354,32 @@ export default struct SpotDetailPage {
       }
       .width('100%')
 
-
       // 坐标信息
-      Text(`经纬度：${this.spotDetail.latitude.toFixed(6)}, ${this.spotDetail.longitude.toFixed(6)}`)
-        .fontSize(14)
-        .fontColor('#666666')
-        .width('100%')
-        .textAlign(TextAlign.Center)
-        .margin({ top: 8 })
-    }
-    .width('90%')
-    .backgroundColor(Color.White)
-    .borderRadius(16)
-    .padding({ left: 20, right: 20, top: 20, bottom: 20 })
-    .margin({ top: 15 })
-    .alignSelf(ItemAlign.Center)
-    .shadow({ radius: 8, color: '#0000000D' })
-  }
-
-  // ==================== 游玩提示卡片 ====================
-  @Builder
-  buildTipsCard() {
-    Column({ space: 12 }) {
-      // 标题
-      Text('游玩提示')
-        .fontSize(18)
-        .fontWeight(FontWeight.Bold)
-        .fontColor('#1A1A1A')
+      Column({ space: 8 }) {
+        Row() {
+          Text('纬度')
+            .fontSize(14)
+            .fontColor('#666666')
+            .layoutWeight(1)
+          Text(this.spotDetail.latitude.toFixed(6))
+            .fontSize(14)
+            .fontColor('#1A1A1A')
+            .fontWeight(FontWeight.Medium)
+        }
         .width('100%')
 
-
+        Row() {
+          Text('经度')
+            .fontSize(14)
+            .fontColor('#666666')
+            .layoutWeight(1)
+          Text(this.spotDetail.longitude.toFixed(6))
+            .fontSize(14)
+            .fontColor('#1A1A1A')
+            .fontWeight(FontWeight.Medium)
+        }
+        .width('100%')
+      }
     }
     .width('90%')
     .backgroundColor(Color.White)
@@ -427,7 +424,6 @@ export default struct SpotDetailPage {
       .padding({ left: 15, right: 15 })
     }
     .width('100%')
-    .height(70) // 固定高度
     .backgroundColor(Color.White)
     .shadow({ radius: 10, color: '#0000001A', offsetY: -3 })
     .padding({ top: 10, bottom: 10 })
@@ -470,6 +466,9 @@ export default struct SpotDetailPage {
   private onCheckIn() {
     console.log('打卡景点:', this.spotDetail.name);
     // TODO: 跳转到打卡页面
+    router.pushUrl({
+      url:"pages/CheckInSpotsPage"
+    })
   }
 
   // ==================== 生命周期方法 ====================
@@ -483,7 +482,7 @@ export default struct SpotDetailPage {
       this.spotId = params.spotId;
       console.log('接收到的spotId:', this.spotId);
 
-      // TODO: 根据spotId调用API获取景点详情
+      // 加载景点详情数据
       this.loadSpotDetail();
     } else {
       console.warn('未接收到spotId参数，使用默认数据');
@@ -493,20 +492,44 @@ export default struct SpotDetailPage {
   }
 
   // 加载景点详情数据
-  private loadSpotDetail() {
+  private async loadSpotDetail() {
     console.log('开始加载景点详情，ID:', this.spotId);
+    this.isLoading = true;
 
-    //getSpotDetail(this.spotId)
-
-    // 暂时使用假数据
-    this.loadMockData();
+    try {
+      const result = await getSpotDetail(this.spotId);
+      if (result) {
+        this.spotDetail = result;
+        console.log('景点详情加载成功:', result.name);
+      } else {
+        // 如果API返回空，使用假数据
+        console.log('API返回空数据，使用假数据');
+        this.loadMockData();
+      }
+    } catch (error) {
+      console.error('加载景点详情失败:', error);
+      // 使用假数据
+      this.loadMockData();
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   // 加载假数据
   private loadMockData() {
     console.log('加载假数据');
+    this.spotDetail = {
+      spotId: this.spotId || 101,
+      name: mockSpotDetail.name,
+      images: [...mockSpotDetail.images], // 复制数组
+      video: mockSpotDetail.video,
+      description: mockSpotDetail.description,
+      zoneId: mockSpotDetail.zoneId,
+      latitude: mockSpotDetail.latitude,
+      longitude: mockSpotDetail.longitude,
+      openTime: mockSpotDetail.openTime
+    };
     this.isLoading = false;
-    // 假数据已经在初始化时设置了
   }
 
   aboutToDisappear() {

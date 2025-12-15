@@ -1,6 +1,6 @@
 // entry/src/main/ets/pages/CheckinSpotsPage.ets
 import router from '@ohos.router';
-import {getCheckInSpots, GetReq, GetCheckInData, SubmitReq, SubmitResData, Submit} from '../api/checkIn'
+import {getCheckInSpots, GetReq} from '../api/checkIn'
 // 假数据 - 根据文档中的返回格式
 const mockCheckinSpots: CheckinSpot[] =  [
   {
@@ -421,22 +421,30 @@ export default struct CheckinSpotsPage {
 
   // 查看点位详情
   private viewSpotDetail(spotId: number) {
+
+    spotId = 101 // for test
     console.log('查看点位详情:', spotId);
     // TODO: 跳转到点位详情页面
-    // router.push({
-    //   url: 'pages/SpotDetailPage',
-    //   params: { spotId }
-    // });
+    router.pushUrl({
+      url:"pages/SpotDetailPage",
+      params:{spotId}
+    })
   }
 
   // 打卡
   private checkIn(spotId: number) {
     console.log('打卡:', spotId);
     // TODO: 跳转到打卡页面
-    // router.push({
-    //   url: 'pages/CheckinPage',
-    //   params: { spotId }
-    // });
+    router.push({
+      url: 'pages/SubmitCheckInPage',
+      params: {
+        spotId: spotId,
+        spotName: '打卡点名称', // 可以从spot对象获取
+        latitude: 1, // for test
+        longitude: 1
+      }
+    });
+
   }
 
   // 在地图上查看

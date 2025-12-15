@@ -104,7 +104,7 @@ export async function login(loginData: LoginRequest): Promise<string> {
 
   try {
     const response = await request.request(
-      "http://10.54.37.27:8080/api/v1/auth/login",
+      "http://10.54.35.223:8080/api/v1/auth/login",
       {
         method: http.RequestMethod.POST,
         header: {
@@ -179,7 +179,7 @@ export async function getProfile(): Promise<ProfileApiResponse | void> {
     const userId = await StorageUtil.getUserId();
     console.log("when getProfile, i got userId:", userId);
     const response = await request.request(
-      `http://10.54.37.27:8080/api/v1/auth/profile?userId=${userId}`,
+      `http://10.54.35.223:8080/api/v1/auth/profile?userId=${userId}`,
       {
         method: http.RequestMethod.GET,
         header: {
@@ -251,7 +251,7 @@ export async function updateProfile(updateData: UpdateProfileRequest): Promise<U
     console.log('🔍 DEBUG: Token length =', token.length);
 
     const response = await request.request(
-      "http://10.54.37.27:8080/user/profile",
+      "http://10.54.35.223:8080/user/profile",
       {
         method: http.RequestMethod.PUT,
         header: {
