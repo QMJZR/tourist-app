@@ -75,7 +75,7 @@ export default struct SpotDetailPage {
       .scrollBar(BarState.Off)
 
       // 3. 底部操作栏 - 固定高度，不会被挤压
-      this.buildBottomActionBar()
+      //this.buildBottomActionBar()
     }
     .width('100%')
     .height('100%')
@@ -151,7 +151,7 @@ export default struct SpotDetailPage {
         this.currentImageIndex = index;
       })
 
-      // ... 其他代码（指示器、计数器） ...
+
     }
     .width('100%')
     .height(300)

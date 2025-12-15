@@ -284,8 +284,8 @@ export default struct FeedsPage {
       Row() {
         // 点赞按钮
         Row({ space: 5 }) {
-          Button(feed.liked ? '已点赞' : '点赞')
-            .fontSize(16)
+          Button(feed.liked ? '♥' : '👍')
+            .fontSize(8)
             .fontColor(feed.liked ? '#FF3B30' : '#666666')
             .backgroundColor(Color.Transparent)
             .width(40)
@@ -415,30 +415,33 @@ export default struct FeedsPage {
     console.log('开始加载动态数据...');
     this.isLoading = true;
 
-    // 调用API获取动态列表
-    const params: FeedsParams = {
-      page: this.currentPage,
-      pageSize: 10,
-      sort: this.sortBy
-    };
+    this.feeds = [...mockFeeds];
 
-    try {
-      const result = await getFeeds(params);
-      if (result && result.length > 0) {
-        this.feeds = result;
-        console.log('动态数据加载成功，共', result.length, '条');
-      } else {
-        // 如果API返回空，使用假数据
-        console.log('API返回空数据，使用假数据');
-        this.feeds = [...mockFeeds];
-      }
-    } catch (error) {
-      console.error('加载动态数据失败:', error);
-      // 使用假数据
-      this.feeds = [...mockFeeds];
-    } finally {
-      this.isLoading = false;
-    }
+    this.isLoading = false;
+    // 调用API获取动态列表
+    // const params: FeedsParams = {
+    //   page: this.currentPage,
+    //   pageSize: 10,
+    //   sort: this.sortBy
+    // };
+    //
+    // try {
+    //   const result = await getFeeds(params);
+    //   if (result && result.length > 0) {
+    //     this.feeds = result;
+    //     console.log('动态数据加载成功，共', result.length, '条');
+    //   } else {
+    //     // 如果API返回空，使用假数据
+    //     console.log('API返回空数据，使用假数据');
+    //     this.feeds = [...mockFeeds];
+    //   }
+    // } catch (error) {
+    //   console.error('加载动态数据失败:', error);
+    //   // 使用假数据
+    //   this.feeds = [...mockFeeds];
+    // } finally {
+    //   this.isLoading = false;
+    // }
   }
 
   aboutToDisappear() {
