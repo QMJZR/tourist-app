@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/feeds")
+@RequestMapping("/api/V1/feeds")
 @RequiredArgsConstructor
 public class FeedController {
 
@@ -15,7 +15,7 @@ public class FeedController {
     private final FeedLikeService likeService;
     private final TokenUtil tokenUtil;
 
-    @GetMapping
+    @GetMapping("")
     public Response<PageResponseDTO<FeedResponseDTO>> list(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize,
