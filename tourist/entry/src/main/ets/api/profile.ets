@@ -129,7 +129,8 @@ export async function getCheckins(page: number = 1): Promise<CheckinsApiResponse
         method: http.RequestMethod.GET,
         header: {
           'Content-Type': 'application/json',
-          'token': token  // 双token头
+          'Authorization': `Bearer ${token}`,  // 添加 Authorization 头
+          'token': token  // 保留原有的 token 头
         }
       }
     );
@@ -167,6 +168,29 @@ export async function getCheckins(page: number = 1): Promise<CheckinsApiResponse
       } else {
         console.warn('响应结果为空');
       }
+    } else if (response.responseCode === 401 || response.responseCode === 403) {
+      // 处理认证失败的情况
+      console.log("Token验证失败或用户不存在");
+
+      return {
+        code: response.responseCode,
+        msg: "登录已过期，请重新登录",
+        data: null
+      } as CheckinsApiResponse;
+    } else if (response.responseCode === 500) {
+      // 处理服务器内部错误
+      console.log("服务器内部错误（500）");
+
+      if (response.result) {
+        const errorResult = String(response.result);
+        console.log("错误响应内容:", errorResult);
+      }
+
+      return {
+        code: 500,
+        msg: "服务器内部错误，请稍后重试",
+        data: null
+      } as CheckinsApiResponse;
     } else {
       console.log("获取打卡记录失败，状态码:", response.responseCode);
 
@@ -177,13 +201,27 @@ export async function getCheckins(page: number = 1): Promise<CheckinsApiResponse
         try {
           const errorJson: CheckinsApiResponse = JSON.parse(errorResult);
           console.log("错误JSON:", errorJson);
+          return errorJson;
         } catch (e) {
           console.log("错误内容不是JSON格式");
         }
       }
+
+      // 返回通用的错误响应
+      return {
+        code: response.responseCode,
+        msg: `请求失败，状态码: ${response.responseCode}`,
+        data: null
+      } as CheckinsApiResponse;
     }
   } catch (error) {
     console.error('获取打卡记录异常:', error);
+    // 返回网络异常的错误响应
+    return {
+      code: -1,
+      msg: '网络请求异常',
+      data: null
+    } as CheckinsApiResponse;
   } finally {
     request.destroy();
   }
