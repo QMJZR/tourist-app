@@ -253,178 +253,178 @@ struct RankingPage {
   }
 
   // 构建用户自己的排名卡片
-  @Builder
-  buildMyRankingCard() {
-    // 检查 myRanking 是否为 null
-    if (!this.myRanking || !this.showMyRanking) {
-
-    }
-
-    // 使用 myRanking! 表示我们知道它不为 null
-    Column({ space: 12 }) {
-      Row({ space: 8 }) {
-        Text('我的排名')
-          .fontSize(16)
-          .fontWeight(FontWeight.Medium)
-          .fontColor('#333333')
-
-        // 切换显示/隐藏按钮
-        Button(this.showMyRanking ? '隐藏' : '显示') {
-          Text(this.showMyRanking ? '隐藏' : '显示')
-            .fontSize(12)
-            .fontColor('#007AFF')
-        }
-        .backgroundColor(Color.Transparent)
-        .borderRadius(12)
-        .padding({ left: 8, right: 8 })
-        .height(24)
-        .onClick(() => {
-          this.showMyRanking = !this.showMyRanking;
-        })
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
-
-      // 我的排名信息
-      Column({ space: 0 }) {
-        Row({ space: 16 }) {
-          // 排名
-          Column({ space: 2 }) {
-            Text(`#${this.myRanking!.rank}`)
-              .fontSize(20)
-              .fontWeight(FontWeight.Bold)
-              .fontColor('#FF9500')
-
-            // 趋势
-            Row({ space: 2 }) {
-              Text(this.getTrendIcon(this.myRanking!.trend))
-                .fontSize(12)
-                .fontColor(this.getTrendColor(this.myRanking!.trend))
-
-              Text(this.myRanking!.trend === 'up' ? '上升' : this.myRanking!.trend === 'down' ? '下降' : '稳定')
-                .fontSize(10)
-                .fontColor('#999999')
-            }
-          }
-          .alignItems(HorizontalAlign.Center)
-          .width(60)
-
-          // 用户信息
-          Row({ space: 12 }) {
-            // 头像 - 确保 avatar 不为空
-            if (this.myRanking!.avatar && this.myRanking!.avatar.trim() !== '') {
-              Image(this.myRanking!.avatar)
-                .width(48)
-                .height(48)
-                .objectFit(ImageFit.Cover)
-                .borderRadius(24)
-            } else {
-              // 默认头像
-              Column() {
-                Text('👤')
-                  .fontSize(24)
-                  .fontColor('#666666')
-              }
-              .width(48)
-              .height(48)
-              .justifyContent(FlexAlign.Center)
-              .alignItems(HorizontalAlign.Center)
-              .backgroundColor('#F0F0F0')
-              .borderRadius(24)
-            }
-
-            // 用户详情
-            Column({ space: 4 }) {
-              Row({ space: 8 }) {
-                Text(this.myRanking!.nickname || '未知用户')
-                  .fontSize(16)
-                  .fontWeight(FontWeight.Medium)
-                  .fontColor('#333333')
-
-                // 趋势图标
-                if (this.myRanking!.trend === 'new') {
-                  Text('✨')
-                    .fontSize(12)
-                    .fontColor('#FF9500')
-                }
-              }
-
-              Text(`@${this.myRanking!.username || 'unknown'}`)
-                .fontSize(12)
-                .fontColor('#999999')
-            }
-          }
-          .layoutWeight(1)
-
-          // 综合得分
-          Column({ space: 2 }) {
-            Text(`${this.myRanking!.score}`)
-              .fontSize(18)
-              .fontWeight(FontWeight.Bold)
-              .fontColor('#FF3B30')
-
-            Text('综合得分')
-              .fontSize(10)
-              .fontColor('#999999')
-          }
-          .alignItems(HorizontalAlign.End)
-        }
-        .width('100%')
-        .padding({ left: 16, right: 16, top: 12, bottom: 12 })
-
-        // 统计数据
-        Row({ space: 16 }) {
-          Column({ space: 2 }) {
-            Text(this.myRanking!.checkinCount.toString())
-              .fontSize(14)
-              .fontWeight(FontWeight.Medium)
-              .fontColor('#34C759')
-
-            Text('打卡')
-              .fontSize(10)
-              .fontColor('#999999')
-          }
-          .alignItems(HorizontalAlign.Center)
-          .layoutWeight(1)
-
-          Column({ space: 2 }) {
-            Text(this.myRanking!.likeCount.toString())
-              .fontSize(14)
-              .fontWeight(FontWeight.Medium)
-              .fontColor('#007AFF')
-
-            Text('点赞')
-              .fontSize(10)
-              .fontColor('#999999')
-          }
-          .alignItems(HorizontalAlign.Center)
-          .layoutWeight(1)
-
-          Column({ space: 2 }) {
-            Text(this.myRanking!.points.toString())
-              .fontSize(14)
-              .fontWeight(FontWeight.Medium)
-              .fontColor('#FF9500')
-
-            Text('积分')
-              .fontSize(10)
-              .fontColor('#999999')
-          }
-          .alignItems(HorizontalAlign.Center)
-          .layoutWeight(1)
-        }
-        .width('100%')
-        .padding({ left: 16, right: 16, top: 8, bottom: 16 })
-      }
-      .backgroundColor('#F8F9FF')
-      .borderRadius(12)
-    }
-    .padding({ left: 16, right: 16, top: 12, bottom: 12 })
-    .backgroundColor(Color.White)
-    .borderRadius(12)
-    .margin({ left: 16, right: 16, top: 12 })
-    .shadow({ radius: 4, color: '#00000008' })
-  }
+  // @Builder
+  // buildMyRankingCard() {
+  //   // 检查 myRanking 是否为 null
+  //   if (!this.myRanking || !this.showMyRanking) {
+  //
+  //   }
+  //
+  //   // 使用 myRanking! 表示我们知道它不为 null
+  //   Column({ space: 12 }) {
+  //     Row({ space: 8 }) {
+  //       Text('我的排名')
+  //         .fontSize(16)
+  //         .fontWeight(FontWeight.Medium)
+  //         .fontColor('#333333')
+  //
+  //       // 切换显示/隐藏按钮
+  //       Button(this.showMyRanking ? '隐藏' : '显示') {
+  //         Text(this.showMyRanking ? '隐藏' : '显示')
+  //           .fontSize(12)
+  //           .fontColor('#007AFF')
+  //       }
+  //       .backgroundColor(Color.Transparent)
+  //       .borderRadius(12)
+  //       .padding({ left: 8, right: 8 })
+  //       .height(24)
+  //       .onClick(() => {
+  //         this.showMyRanking = !this.showMyRanking;
+  //       })
+  //     }
+  //     .width('100%')
+  //     .justifyContent(FlexAlign.SpaceBetween)
+  //
+  //     // 我的排名信息
+  //     Column({ space: 0 }) {
+  //       Row({ space: 16 }) {
+  //         // 排名
+  //         Column({ space: 2 }) {
+  //           Text(`#${this.myRanking!.rank}`)
+  //             .fontSize(20)
+  //             .fontWeight(FontWeight.Bold)
+  //             .fontColor('#FF9500')
+  //
+  //           // 趋势
+  //           Row({ space: 2 }) {
+  //             Text(this.getTrendIcon(this.myRanking!.trend))
+  //               .fontSize(12)
+  //               .fontColor(this.getTrendColor(this.myRanking!.trend))
+  //
+  //             Text(this.myRanking!.trend === 'up' ? '上升' : this.myRanking!.trend === 'down' ? '下降' : '稳定')
+  //               .fontSize(10)
+  //               .fontColor('#999999')
+  //           }
+  //         }
+  //         .alignItems(HorizontalAlign.Center)
+  //         .width(60)
+  //
+  //         // 用户信息
+  //         Row({ space: 12 }) {
+  //           // 头像 - 确保 avatar 不为空
+  //           if (this.myRanking!.avatar && this.myRanking!.avatar.trim() !== '') {
+  //             Image(this.myRanking!.avatar)
+  //               .width(48)
+  //               .height(48)
+  //               .objectFit(ImageFit.Cover)
+  //               .borderRadius(24)
+  //           } else {
+  //             // 默认头像
+  //             Column() {
+  //               Text('👤')
+  //                 .fontSize(24)
+  //                 .fontColor('#666666')
+  //             }
+  //             .width(48)
+  //             .height(48)
+  //             .justifyContent(FlexAlign.Center)
+  //             .alignItems(HorizontalAlign.Center)
+  //             .backgroundColor('#F0F0F0')
+  //             .borderRadius(24)
+  //           }
+  //
+  //           // 用户详情
+  //           Column({ space: 4 }) {
+  //             Row({ space: 8 }) {
+  //               Text(this.myRanking!.nickname || '未知用户')
+  //                 .fontSize(16)
+  //                 .fontWeight(FontWeight.Medium)
+  //                 .fontColor('#333333')
+  //
+  //               // 趋势图标
+  //               if (this.myRanking!.trend === 'new') {
+  //                 Text('✨')
+  //                   .fontSize(12)
+  //                   .fontColor('#FF9500')
+  //               }
+  //             }
+  //
+  //             Text(`@${this.myRanking!.username || 'unknown'}`)
+  //               .fontSize(12)
+  //               .fontColor('#999999')
+  //           }
+  //         }
+  //         .layoutWeight(1)
+  //
+  //         // 综合得分
+  //         Column({ space: 2 }) {
+  //           Text(`${this.myRanking!.score}`)
+  //             .fontSize(18)
+  //             .fontWeight(FontWeight.Bold)
+  //             .fontColor('#FF3B30')
+  //
+  //           Text('综合得分')
+  //             .fontSize(10)
+  //             .fontColor('#999999')
+  //         }
+  //         .alignItems(HorizontalAlign.End)
+  //       }
+  //       .width('100%')
+  //       .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+  //
+  //       // 统计数据
+  //       Row({ space: 16 }) {
+  //         Column({ space: 2 }) {
+  //           Text(this.myRanking!.checkinCount.toString())
+  //             .fontSize(14)
+  //             .fontWeight(FontWeight.Medium)
+  //             .fontColor('#34C759')
+  //
+  //           Text('打卡')
+  //             .fontSize(10)
+  //             .fontColor('#999999')
+  //         }
+  //         .alignItems(HorizontalAlign.Center)
+  //         .layoutWeight(1)
+  //
+  //         Column({ space: 2 }) {
+  //           Text(this.myRanking!.likeCount.toString())
+  //             .fontSize(14)
+  //             .fontWeight(FontWeight.Medium)
+  //             .fontColor('#007AFF')
+  //
+  //           Text('点赞')
+  //             .fontSize(10)
+  //             .fontColor('#999999')
+  //         }
+  //         .alignItems(HorizontalAlign.Center)
+  //         .layoutWeight(1)
+  //
+  //         Column({ space: 2 }) {
+  //           Text(this.myRanking!.points.toString())
+  //             .fontSize(14)
+  //             .fontWeight(FontWeight.Medium)
+  //             .fontColor('#FF9500')
+  //
+  //           Text('积分')
+  //             .fontSize(10)
+  //             .fontColor('#999999')
+  //         }
+  //         .alignItems(HorizontalAlign.Center)
+  //         .layoutWeight(1)
+  //       }
+  //       .width('100%')
+  //       .padding({ left: 16, right: 16, top: 8, bottom: 16 })
+  //     }
+  //     .backgroundColor('#F8F9FF')
+  //     .borderRadius(12)
+  //   }
+  //   .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+  //   .backgroundColor(Color.White)
+  //   .borderRadius(12)
+  //   .margin({ left: 16, right: 16, top: 12 })
+  //   .shadow({ radius: 4, color: '#00000008' })
+  // }
 
   // 构建排行榜项
   @Builder
@@ -672,7 +672,7 @@ struct RankingPage {
             this.buildTimeFilter()
 
             // 我的排名卡片
-            this.buildMyRankingCard()
+            // this.buildMyRankingCard()
 
             // 排行榜列表
             this.buildRankingList()
