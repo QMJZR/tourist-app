@@ -24,8 +24,8 @@ public class FeedController {
             @RequestParam(required = false) String keyword,
             @RequestHeader("Authorization") String auth
     ) {
-
-        Long loginUser = tokenUtil.getUser(auth).getId();
+        String token = auth.substring(7);
+        Long loginUser = tokenUtil.getUser(token).getId();
 
         PageResponseDTO<FeedResponseDTO> data =
                 feedService.list(loginUser, userId, keyword, sort, page, pageSize);
@@ -36,16 +36,16 @@ public class FeedController {
 
     @PostMapping("/{id}/like")
     public Response<FeedLikeDTO> like(@PathVariable Long id, @RequestHeader("Authorization") String auth) {
-
-        Long user = tokenUtil.getUser(auth).getId();
+        String token = auth.substring(7);
+        Long user = tokenUtil.getUser(token).getId();
         return Response.buildSuccess(likeService.like(id, user), "点赞成功");
     }
 
 
     @DeleteMapping("/{id}/like")
     public Response<FeedLikeDTO> unlike(@PathVariable Long id,  @RequestHeader("Authorization") String auth) {
-
-        Long user = tokenUtil.getUser(auth).getId();
+        String token = auth.substring(7);
+        Long user = tokenUtil.getUser(token).getId();
         return Response.buildSuccess(likeService.unlike(id, user), "取消点赞成功");
     }
 }
