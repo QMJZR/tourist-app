@@ -28,14 +28,14 @@
           "when": "inuse"
         }
       },
-      {
-        "name": "ohos.permission.READ_IMAGEVIDEO",
-        "reason": "$string:photo_reason",
-        "usedScene": {
-          "abilities": ["EntryAbility"],
-          "when": "always"
-        }
-      }
+//      {
+//        "name": "ohos.permission.READ_IMAGEVIDEO",
+//        "reason": "$string:photo_reason",
+//        "usedScene": {
+//          "abilities": ["EntryAbility"],
+//          "when": "inuse"
+//        }
+//      }
     ],
     "deliveryWithInstall": true,
     "installationFree": false,

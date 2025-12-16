@@ -2,6 +2,13 @@
 import router from '@ohos.router';
 import { Submit, SubmitReq, SubmitResData } from '../api/checkIn';
 
+import picker from '@ohos.file.picker';
+import { BusinessError } from '@ohos.base';
+import fs from '@ohos.file.fs';
+import common from '@ohos.app.ability.common';
+import util from '@ohos.util';
+import abilityAccessCtrl from '@ohos.abilityAccessCtrl';
+
 interface RouterParams {
   spotId:number;
   spotName:string;
@@ -430,16 +437,123 @@ export default struct SubmitCheckinPage {
 
   // ==================== 交互方法 ====================
 
+  // private async checkAndRequestPermission(): Promise<boolean> {
+  //   try {
+  //     const context = getContext(this) as common.UIAbilityContext;
+  //     const atManager = abilityAccessCtrl.createAtManager();
+  //
+  //     const permissions: Array<string> = ['ohos.permission.READ_IMAGEVIDEO'];
+  //     const result = await atManager.requestPermissionsFromUser(context, permissions);
+  //
+  //     console.info('权限申请结果:', JSON.stringify(result));
+  //
+  //     // 检查是否所有权限都被授予
+  //     const allGranted : boolean = result.authResults.every((granted: number) => granted === 0);
+  //     return allGranted;
+  //
+  //   } catch (err) {
+  //     console.error('权限申请失败:', err);
+  //     return false;
+  //   }
+  // }
+
   // 选择图片
-  private selectImage() {
+  private async selectImage() {
     console.log('选择图片');
     // TODO: 实现图片选择功能
     // 这里模拟选择图片
-    this.imagePreview = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&auto=format&fit=crop';
-    this.hasImage = true;
+    // this.imagePreview = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&auto=format&fit=crop';
+    // this.hasImage = true;
 
     // 实际应该获取 Base64 编码的图片
     // this.formData.image = 'base64_encoded_image_data_here';
+    // const hasPermission = await this.checkAndRequestPermission();
+    // if (!hasPermission) {
+    //   console.error('缺少必要的相册访问权限');
+    //   // 这里可以给用户一个提示，例如弹窗告知
+    //   return; // 权限被拒绝，停止执行后续选择图片操作
+    // }
+    console.log('开始选择图片');
+    try {
+      // 2. 创建选择选项
+      let photoSelectOptions = new picker.PhotoSelectOptions();
+      // 设置选择类型为图片
+      photoSelectOptions.MIMEType = picker.PhotoViewMIMETypes.IMAGE_TYPE;
+      // 设置最大选择数量为1（单张图片）
+      photoSelectOptions.maxSelectNumber = 1;
+
+      // 3. 创建选择器并调用
+      let photoPicker = new picker.PhotoViewPicker();
+      const photoSelectResult = await photoPicker.select(photoSelectOptions);
+
+      console.info('图片选择成功，结果:', JSON.stringify(photoSelectResult));
+
+      // 4. 处理选择结果
+      if (photoSelectResult && photoSelectResult.photoUris && photoSelectResult.photoUris.length > 0) {
+        const selectedImageUri = photoSelectResult.photoUris[0];
+        console.log('选择的图片URI:', selectedImageUri);
+
+        // 设置预览图（直接使用URI）
+        this.imagePreview = selectedImageUri;
+        this.hasImage = true;
+
+        // TODO: 此处可以将URI转换为Base64，以便后续提交
+        this.formData.image = await this.uriToBase64(selectedImageUri);
+
+      } else {
+        console.warn('未选择图片');
+      }
+    } catch (err) {
+      const error = err as BusinessError;
+      console.error('选择图片失败:', JSON.stringify(error));
+      // TODO: 可以在这里添加用户提示
+    }
+  }
+
+  private async uriToBase64(uri: string): Promise<string> {
+    try {
+      // 使用文件系统打开文件
+      const file = fs.openSync(uri, fs.OpenMode.READ_ONLY);
+
+      // 获取文件信息
+      const stat = fs.statSync(file.fd);
+      console.log('文件大小:', stat.size, '字节');
+
+      // 创建ArrayBuffer并读取文件内容
+      const buffer = new ArrayBuffer(stat.size);
+      const readLen = fs.readSync(file.fd, buffer);
+      console.log('实际读取长度:', readLen);
+
+      // 关闭文件
+      fs.closeSync(file.fd);
+
+      if (readLen <= 0) {
+        console.error('文件内容为空');
+        return '';
+      }
+
+      // 方法1: 使用 util.Base64 编码（推荐）
+      try {
+        // 将ArrayBuffer转换为Uint8Array
+        const uint8Array = new Uint8Array(buffer, 0, readLen);
+
+        // 创建Base64编码器
+        const base64Encoder = new util.Base64Helper();
+
+        // 将Uint8Array编码为Base64字符串
+        const base64Str = await base64Encoder.encodeToString(uint8Array);
+        console.log('Base64编码成功，长度:', base64Str.length);
+
+        return base64Str;
+      } catch (encodeErr) {
+        console.error('Base64编码失败:', encodeErr);
+        return '';
+      }
+
+    } catch (err) {
+      console.error('图片转Base64失败:', JSON.stringify(err));
+      return '';
+    }
   }
 
   // 删除图片

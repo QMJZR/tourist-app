@@ -93,13 +93,13 @@ interface GeneratedTypeLiteralInterface_1 {
   expiresIn?: number;
 }
 
-interface LoginApiResponse {
+export interface LoginApiResponse {
   code: number;
   msg: string;
   data: GeneratedTypeLiteralInterface_1;
 }
 
-export async function login(loginData: LoginRequest): Promise<string> {
+export async function login(loginData: LoginRequest): Promise<LoginApiResponse | void> {
   let request = http.createHttp();
 
   try {
@@ -123,23 +123,25 @@ export async function login(loginData: LoginRequest): Promise<string> {
 
         console.log('登录响应:', result);
         const res : LoginApiResponse = JSON.parse(result);
-        console.log("before save loginInfo, userId is" ,res.data.userId);
-        StorageUtil.saveLoginInfo(res.data.token, res.data.userId);
-        return result;
+        if(res.data != null) {
+          console.log("before save loginInfo, userId is" ,res.data.userId);
+          StorageUtil.saveLoginInfo(res.data.token, res.data.userId);
+        }
+        return res;
       } else {
         console.warn('响应结果为空');
-        return '{}';
+        return ;
       }
     } else {
       console.log("登录请求失败，状态码:", response.responseCode);
       if (response.result) {
-        return String(response.result);
+        return ;
       }
-      return '';
+      return ;
     }
   } catch (error) {
     console.error('登录请求异常:', error);
-    return '';
+    return ;
   } finally {
     request.destroy();
   }
