@@ -22,7 +22,7 @@ export default class EntryAbility extends UIAbility {
     // Main window is created, set main page for this ability
     hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
 
-    windowStage.loadContent('pages/MainPage', (err) => {
+    windowStage.loadContent('pages/LoginPage', (err) => {
       if (err.code) {
         hilog.error(DOMAIN, 'testTag', 'Failed to load the content. Cause: %{public}s', JSON.stringify(err));
         return;
@@ -63,6 +63,7 @@ export default class EntryAbility extends UIAbility {
         if (data.authResults && data.authResults[0] === 0) {
           hilog.info(DOMAIN, 'testTag', '位置权限已授权');
           this.getCurrentLocation();
+          //this.requestPhotoPermission(); // 【新增】接着申请相册权限
         } else if (data.authResults) {
           hilog.warn(DOMAIN, 'testTag', '位置权限被拒绝，状态码: %{public}d', data.authResults[0]);
         }
@@ -88,6 +89,28 @@ export default class EntryAbility extends UIAbility {
       );
     } catch (err) {
       hilog.error(DOMAIN, 'testTag', '获取位置失败: %{public}s', JSON.stringify(err));
+    }
+  }
+
+  // 【新增】申请相册权限的核心方法
+  private requestPhotoPermission(): void {
+    try {
+      const atManager = abilityAccessCtrl.createAtManager();
+      atManager.requestPermissionsFromUser(
+        this.context,
+        ['ohos.permission.READ_IMAGEVIDEO'] // 相册权限
+      ).then((data) => {
+        if (data.authResults && data.authResults[0] === 0) {
+          hilog.info(DOMAIN, 'testTag', '相册权限已授权');
+        } else if (data.authResults) {
+          hilog.warn(DOMAIN, 'testTag', '相册权限被拒绝，状态码: %{public}d', data.authResults[0]);
+        }
+      }).catch((err: Error) => {
+        hilog.error(DOMAIN, 'testTag', '相册权限申请失败: %{public}s', err.message);
+      });
+    } catch (err) {
+      const error = err as Error;
+      hilog.error(DOMAIN, 'testTag', '相册权限申请异常: %{public}s', error.message);
     }
   }
 }

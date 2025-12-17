@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/admin/checkpoints")
+@RequestMapping("/api/admin/checkpoints")
 @RequiredArgsConstructor
 public class AdminCheckpointController {
 

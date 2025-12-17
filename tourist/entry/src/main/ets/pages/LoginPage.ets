@@ -1,6 +1,6 @@
 import router from '@ohos.router';
-import {login, LoginRequest, getProfile} from "../api/user";
-
+import {login, LoginRequest, LoginApiResponse} from "../api/user";
+import {Prompt} from '@kit.ArkUI'
 @Entry
 @Component
 struct LoginPage {
@@ -85,13 +85,13 @@ struct LoginPage {
     .alignItems(HorizontalAlign.Center)
   }
 
-  private handleLogin() {
+  private async handleLogin() {
 
     const data = new LoginRequest();
     data.username = this.username;
     data.password = this.password;
-    login(data);
-
+    const res : LoginApiResponse  = await login(data) as LoginApiResponse;
+    if(res.code == 200){
     // 跳转到主页面
     router.replaceUrl({
       url: 'pages/MainPage',
@@ -100,8 +100,12 @@ struct LoginPage {
         loginTime: new Date().toLocaleString()
       }
     });
+    } else {
+      Prompt.showToast({
+        message:"账号或密码错误，请重试",
+        duration: 2000
+      })
+    }
 
-    //get profile
-   // getProfile();
   }
 }

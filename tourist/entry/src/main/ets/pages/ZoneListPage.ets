@@ -1,409 +1,291 @@
-// entry/src/main/ets/pages/ZonesPage.ets
-import { getZones } from '../api/zone'; // 稍后创建这个类型文件
+// entry/src/main/ets/pages/ZoneListPage.ets
+import router from '@ohos.router';
+import { getZones, ZoneItem } from '../api/zone'; // 注意：这里应该是正确的接口
 
-// 引领区卡片数据接口
-interface ZoneCard {
-  zoneId: number;
-  name: string;
-  description: string;
-  banner: string[];
-  coverImage?: string; // 封面图
-  spotCount?: number; // 景点数量
-  rating?: number; // 评分
-}
+// 正确的假数据 - 基于 ZoneItem 接口
+const mockZones: ZoneItem[] = [
+  {
+    zoneId: 1,
+    name: '自然风光区',
+    description: '集中展示了园区最壮丽的自然景观，包括瀑布、湖泊、山脉等多种地貌。',
+    banner: [
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1464207687429-7505649dae38?w=800&auto=format&fit=crop'
+    ]
+  },
+  {
+    zoneId: 2,
+    name: '文化体验区',
+    description: '融合了传统与现代文化元素，提供丰富的文化展示和互动体验项目。',
+    banner: [
+      'https://images.unsplash.com/photo-1551632811-561732d1e306?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&auto=format&fit=crop'
+    ]
+  },
+  {
+    zoneId: 3,
+    name: '休闲娱乐区',
+    description: '适合家庭和朋友聚会的休闲区域，提供各种娱乐设施和放松空间。',
+    banner: [
+      'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1518998053901-5348d3961a04?w=800&auto=format&fit=crop'
+    ]
+  },
+  {
+    zoneId: 4,
+    name: '生态保护区',
+    description: '保护区内有多种珍稀动植物，是生态观察和自然教育的理想场所。',
+    banner: [
+      'https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1476820865390-c52aeebb9891?w=800&auto=format&fit=crop'
+    ]
+  }
+];
 
 @Entry
 @Component
-export default struct ZonesPage {
+export default struct ZoneListPage {
   // 引领区列表数据
-  @State zones: ZoneCard[] = [
-    {
-      zoneId: 1,
-      name: '主题引领区',
-      description: '展示园区历史与文化特色，融合传统与现代元素，体验独特的主题之旅。',
-      banner: [
-        'https://images.unsplash.com/photo-1528164344705-47542687000d?w=800&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w-800&auto=format&fit=crop'
-      ],
-      coverImage: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&auto=format&fit=crop',
-      spotCount: 12,
-      rating: 4.8
-    },
-    {
-      zoneId: 2,
-      name: '生态体验区',
-      description: '以自然风光与生态科普为主，亲近大自然，体验生态之美。',
-      banner: [
-        'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=800&auto=format&fit=crop'
-      ],
-      coverImage: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=400&auto=format&fit=crop',
-      spotCount: 8,
-      rating: 4.6
-    },
-    {
-      zoneId: 3,
-      name: '艺术创意区',
-      description: '汇聚当代艺术与创意设计，感受艺术的无限可能。',
-      banner: [
-        'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=800&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w-800&auto=format&fit=crop'
-      ],
-      coverImage: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=400&auto=format&fit=crop',
-      spotCount: 15,
-      rating: 4.9
-    },
-    {
-      zoneId: 4,
-      name: '科技探索区',
-      description: '前沿科技体验与互动，探索未来的无限可能。',
-      banner: [
-        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop'
-      ],
-      coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&auto=format&fit=crop',
-      spotCount: 10,
-      rating: 4.7
-    },
-    {
-      zoneId: 5,
-      name: '历史文化区',
-      description: '追溯历史脉络，感受文化传承的深厚底蕴。',
-      banner: [
-        'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1529408632839-a54952c491e5?w-800&auto=format&fit=crop'
-      ],
-      coverImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&auto=format&fit=crop',
-      spotCount: 20,
-      rating: 4.5
-    },
-    {
-      zoneId: 6,
-      name: '休闲娱乐区',
-      description: '放松身心，享受休闲时光，体验多样娱乐项目。',
-      banner: [
-        'https://images.unsplash.com/photo-1516937941344-00b4e0337589?w=800&auto=format&fit=crop'
-      ],
-      coverImage: 'https://images.unsplash.com/photo-1516937941344-00b4e0337589?w=400&auto=format&fit=crop',
-      spotCount: 18,
-      rating: 4.4
-    }
-  ];
+  @State zones: ZoneItem[] = [];
 
-  // 搜索关键词
-  @State searchText: string = '';
+  // 加载状态
+  @State isLoading: boolean = true;
 
-  // 当前选中的筛选标签
-  @State selectedTag: string = '全部';
-
-  // 筛选标签列表
-  @State tags: string[] = ['全部', '热门', '附近', '历史', '生态', '艺术', '科技'];
-
+  // 页面构建
   build() {
     Column() {
-      // 1. 顶部标题和搜索栏
-      this.buildHeader()
+      // 顶部导航栏
+      this.buildNavigationBar()
 
-      // // 2. 筛选标签栏
-      this.buildFilterTags()
-
-      //3. 引领区卡片网格 - 使用flex:1占据剩余空间
-      Column() {
-        this.buildZonesGrid()
+      // 内容区域
+      if (this.isLoading) {
+        this.buildLoadingView()
+      } else if (this.zones.length === 0) {
+        this.buildEmptyView()
+      } else {
+        this.buildZonesList()
       }
-      .width('100%')
-      .flexGrow(1) // 关键：占据剩余空间
-
-      // 4. 底部安全区域
-      Row()
-        .height(60)
-        .width('100%')
     }
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F7FA')
+    .padding({bottom: 60})
   }
 
-  // ==================== 顶部标题和搜索栏 ====================
-
+  // ==================== 顶部导航栏 ====================
   @Builder
-  buildHeader() {
-    Column({ space: 15 }) {
-      // 标题
-      Row() {
-        Text('引领区探索')
-          .fontSize(28)
-          .fontWeight(FontWeight.Bold)
+  buildNavigationBar() {
+    Column() {
+      Row({ space: 10 }) {
+        // 返回按钮（如果是从其他页面跳转过来的）
+        // Button('←')
+        //   .fontSize(20)
+        //   .fontColor('#1A1A1A')
+        //   .backgroundColor(Color.Transparent)
+        //   .width(40)
+        //   .height(40)
+        //   .onClick(() => {
+        //     router.back();
+        //   })
+
+        // 标题
+        Text('引领区列表')
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium)
           .fontColor('#1A1A1A')
           .layoutWeight(1)
 
-        // 地图按钮
-        Button('🗺️', { type: ButtonType.Circle })
-          .width(40)
-          .height(40)
-          .backgroundColor(Color.White)
-          .shadow({ radius: 2, color: '#00000010' })
+        // 刷新按钮
+        Button('刷新')
+          .fontSize(14)
+          .fontColor('#007AFF')
+          .backgroundColor(Color.Transparent)
           .onClick(() => {
-            console.log('点击地图按钮');
+            this.loadZones();
           })
       }
       .width('100%')
-      .padding({ left: 20, right: 20, top: 15 })
-
-      // 搜索框
-      Row({ space: 10 }) {
-        // 搜索图标
-        Text('🔍')
-          .fontSize(18)
-          .margin({ left: 15 })
-
-        // 搜索输入框
-        TextInput({ placeholder: '搜索引领区、景点...' })
-          .placeholderColor('#999999')
-          .fontSize(16)
-          .width('100%')
-          .height(48)
-          .backgroundColor(Color.White)
-          .caretColor('#007AFF')
-          .onChange((value: string) => {
-            this.searchText = value;
-            console.log('搜索关键词:', value);
-          })
-
-        // 搜索按钮
-        Button('搜索')
-          .fontSize(14)
-          .fontColor(Color.White)
-          .backgroundColor('#007AFF')
-          .height(36)
-          .borderRadius(18)
-          .margin({ right: 10 })
-          .onClick(() => {
-            this.onSearch();
-          })
-      }
-      .width('90%')
-      .height(52)
-      .backgroundColor(Color.White)
-      .borderRadius(26)
-      .shadow({ radius: 6, color: '#00000010' })
-      .alignSelf(ItemAlign.Center)
+      .height(60)
+      .padding({ left: 15, right: 15 })
     }
     .width('100%')
-    .backgroundColor('#FFFFFF')
-    .padding({ bottom: 15 })
+    .backgroundColor(Color.White)
     .shadow({ radius: 2, color: '#00000008' })
   }
 
-  // ==================== 筛选标签栏 ====================
-
+  // ==================== 加载中视图 ====================
   @Builder
-  buildFilterTags() {
-    Scroll() {
-      Row({ space: 10 }) {
-        ForEach(this.tags, (tag: string) => {
-          this.buildTagItem(tag)
-        })
-      }
-      .padding({ left: 20, right: 20, top: 15, bottom: 15 })
-    }
-    .scrollable(ScrollDirection.Horizontal)
-    .backgroundColor(Color.White)
-    .width('100%')
-    .height(60)
-  }
-
-  // 辅助方法：获取标签文字颜色
-  private getTagColor(tag: string): ResourceColor {
-    return this.selectedTag === tag ? Color.White : '#666666';
-  }
-
-  // 辅助方法：获取标签背景色
-  private getTagBackground(tag: string): ResourceColor {
-    return this.selectedTag === tag ? '#007AFF' : '#F5F7FA';
-  }
-
-  @Builder
-  buildTagItem(tag: string) {
-    // 在 @Builder 方法中不能直接使用 this，需要通过参数传递状态
-    Button(tag)
-      .fontSize(14)
-      .fontColor(this.getTagColor(tag))  // 使用辅助方法获取颜色
-      .backgroundColor(this.getTagBackground(tag))  // 使用辅助方法获取背景色
-      .height(32)
-      .borderRadius(16)
-      .padding({ left: 16, right: 16 })
-      .onClick(() => {
-        this.selectedTag = tag;
-        console.log('选择标签:', tag);
-      })
-  }
-
-  // ==================== 引领区卡片网格 ====================
-
-  @Builder
-  buildZonesGrid() {
-    Scroll() {
-      Grid() {
-        ForEach(this.zones, (zone: ZoneCard) => {
-          GridItem() {
-            this.buildZoneCard(zone)
-          }
-        })
-      }
-      .columnsTemplate('1fr 1fr')
-      .columnsGap(12)
-      .rowsGap(12)
-      .backgroundColor('transparent') // 背景色改为透明
-      .width('100%')
-      .height('auto') // 关键：改为auto，自适应内容高度
-      .padding({ left: 15, right: 15, top: 0, bottom: 200 }) // 去掉top padding
+  buildLoadingView() {
+    Column() {
+      LoadingProgress()
+        .color('#007AFF')
+        .width(40)
+        .height(40)
+      Text('正在加载引领区...')
+        .fontSize(14)
+        .fontColor('#666666')
+        .margin({ top: 10 })
     }
     .width('100%')
     .height('100%')
-    .scrollBar(BarState.Off)
+    .justifyContent(FlexAlign.Center)
   }
 
+  // ==================== 空状态视图 ====================
   @Builder
-  buildZoneCard(zone: ZoneCard) {
+  buildEmptyView() {
+    Column() {
+      Text('暂无引领区数据')
+        .fontSize(16)
+        .fontColor('#666666')
+        .margin({ bottom: 10 })
+      Text('管理员正在努力添加中...')
+        .fontSize(14)
+        .fontColor('#999999')
+    }
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+  }
+
+  // ==================== 引领区列表 ====================
+  @Builder
+  buildZonesList() {
+    List({ space: 15 }) {
+      ForEach(this.zones, (zone: ZoneItem) => {
+        ListItem() {
+          this.buildZoneCard(zone)
+        }
+      })
+    }
+    .width('100%')
+    .height('100%')
+    .backgroundColor('#F5F7FA')
+    .padding({ left: 15, right: 15, top: 15, bottom: 15 })
+  }
+
+  // ==================== 引领区卡片 ====================
+  @Builder
+  buildZoneCard(zone: ZoneItem) {
     Column({ space: 0 }) {
-      // 卡片顶部 - 图片区域
-      Stack() {
-        // 背景图片
-        Image(zone.coverImage || zone.banner[0] || '')
+      // 背景图 - 使用banner数组的第一张图片
+      Stack({ alignContent: Alignment.BottomStart }) {
+        Image(zone.banner && zone.banner.length > 0 ? zone.banner[0] : '')
           .width('100%')
-          .height(140)
+          .height(180)
           .objectFit(ImageFit.Cover)
           .borderRadius({ topLeft: 12, topRight: 12 })
 
-        // 图片渐变遮罩
+        // 图片遮罩渐变
         Column()
           .width('100%')
-          .height(140)
-          //.backgroundImage($r('app'), ImageRepeat.NoRepeat)
-          .backgroundImageSize(ImageSize.Cover)
+          .height(60)
+          .backgroundImage(
+            'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%)'
+          )
           .borderRadius({ topLeft: 12, topRight: 12 })
 
-        // 右上角评分标签
-        Row({ space: 3 }) {
-          Text('⭐')
-            .fontSize(12)
-
-          Text(zone.rating?.toFixed(1) || '4.5')
-            .fontSize(12)
+        // 引领区名称（在图片上）
+        Column() {
+          Text(zone.name)
+            .fontSize(18)
+            .fontWeight(FontWeight.Bold)
             .fontColor(Color.White)
-            .fontWeight(FontWeight.Medium)
         }
-        .padding({ left: 8, right: 8 })
-        .height(24)
-        .backgroundColor('#00000080')
-        .borderRadius(12)
-        .position({ x: '85%', y: 10 })
-
-        // 左下角景点数量
-        Row({ space: 3 }) {
-          Text('📍')
-            .fontSize(12)
-
-          Text(`${zone.spotCount || 0}个景点`)
-            .fontSize(12)
-            .fontColor(Color.White)
-            .fontWeight(FontWeight.Medium)
-        }
-        .padding({ left: 8, right: 8 })
-        .height(24)
-        .backgroundColor('#00000080')
-        .borderRadius(12)
-        .position({ x: 10, y: 110 })
+        .padding({ left: 15, right: 15, bottom: 10 })
       }
-      .width('100%')
-      .height(140)
 
-      // 卡片内容区域
-      Column({ space: 6 }) {
-        // 区域名称
-        Text(zone.name)
-          .fontSize(17)
-          .fontWeight(FontWeight.Bold)
-          .fontColor('#1A1A1A')
-          .textAlign(TextAlign.Start)
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .width('100%')
-
-        // 区域描述
+      // 内容区域
+      Column({ space: 10 }) {
+        // 描述信息
         Text(zone.description)
-          .fontSize(13)
+          .fontSize(14)
           .fontColor('#666666')
-          .textAlign(TextAlign.Start)
-          .maxLines(2)
+          .lineHeight(20)
+          .maxLines(3)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
 
-        // 底部操作栏
+        // 底部信息栏
         Row() {
+          // banner数量
+          Row({ space: 5 }) {
+            // Image($r('app.media.ic_image')) // 如果没有图标，可以用文字
+            //   .width(16)
+            //   .height(16)
+            Text(`${zone.banner?.length || 0}张图片`)
+              .fontSize(12)
+              .fontColor('#999999')
+          }
+
           // 查看详情按钮
-          Button('查看详情')
-            .fontSize(14)
-            .fontColor('#007AFF')
-            .backgroundColor('#007AFF10')
-            .height(32)
-            .borderRadius(16)
-            .padding({ left: 15, right: 15 })
-            .onClick(() => {
-              this.onViewZoneDetails(zone);
-            })
-            .margin({ top: 8 })
+          // Button('查看详情 →')
+          //   .fontSize(14)
+          //   .fontColor('#007AFF')
+          //   .backgroundColor(Color.Transparent)
+          //   .layoutWeight(1)
+          //   .onClick(() => {
+          //     this.viewZoneDetail(zone.zoneId);
+          //   })
         }
         .width('100%')
-        .justifyContent(FlexAlign.Start)
+        .padding({ top: 8 })
       }
-      .padding({ left: 12, right: 12, top: 12, bottom: 12 })
-      .backgroundColor(Color.White)
-      .borderRadius({ bottomLeft: 12, bottomRight: 12 })
+      .padding({ left: 15, right: 15, top: 15, bottom: 15 })
     }
     .width('100%')
     .backgroundColor(Color.White)
     .borderRadius(12)
-    .shadow({ radius: 6, color: '#0000000D' })
+    .shadow({ radius: 6, color: '#0000000F' })
     .onClick(() => {
-      this.onZoneCardClick(zone);
+      this.viewZoneDetail(zone.zoneId);
     })
   }
 
   // ==================== 交互方法 ====================
 
-  // 搜索
-  private onSearch() {
-    console.log('执行搜索:', this.searchText);
-    // 这里可以添加搜索逻辑
-  }
-
-  // 点击引领区卡片
-  private onZoneCardClick(zone: ZoneCard) {
-    console.log('点击引领区:', zone.name);
-    // 可以跳转到引领区详情页
-  }
-
-  // 查看详情按钮点击
-  private onViewZoneDetails(zone: ZoneCard) {
-    console.log('查看引领区详情:', zone.zoneId, zone.name);
-    // 这里可以跳转到详情页面，显示轮播图等
+  // 查看引领区详情
+  private viewZoneDetail(zoneId: number) {
+    console.log('查看引领区详情:', zoneId);
+    // TODO: 跳转到引领区详情页面或该引领区下的景点列表页面
+    // router.push({
+    //   url: 'pages/ZoneDetailPage',
+    //   params: { zoneId }
+    // });
   }
 
   // ==================== 生命周期方法 ====================
 
   aboutToAppear() {
-    console.log('引领区页面显示');
-    //
-    this.loadZonesData();
+    console.log('引领区列表页面显示');
+    this.loadZones();
   }
 
   // 加载引领区数据
-  private loadZonesData() {
-    console.log('加载引领区数据...');
-    // 这里后续会调用API
-    getZones();
-    setTimeout(() => {
-      console.log('引领区数据加载完成');
-    }, 500);
+  private async loadZones() {
+    console.log('开始加载引领区数据...');
+    this.isLoading = true;
+
+    try {
+      const result = await getZones();
+      if (result && result.length > 0) {
+        this.zones = result;
+        console.log('引领区数据加载成功，共', result.length, '个引领区');
+      } else {
+        // 如果API返回空，使用假数据
+        console.log('API返回空数据，使用假数据');
+        this.zones = [...mockZones];
+      }
+    } catch (error) {
+      console.error('加载引领区数据失败:', error);
+      // 使用假数据
+      this.zones = [...mockZones];
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  aboutToDisappear() {
+    console.log('引领区列表页面即将消失');
   }
 }

@@ -1,19 +1,16 @@
-import axios from 'axios'
+import axios from '../utils/axiosConfig' 
 
 // ----------------------
 // 登录 / 登出 /注册
 // ----------------------
 export const login = (username: string, password: string) => {
-    return axios.post('/api/admin/login', { username, password })
+    return axios.post('/v1/admin/auth/login', { username, password })
 }
 
 export const register = (username: string, password: string, email: string) => {
-    return axios.post('/api/admin/register', { username, password, email })
+    return axios.post('/v1/admin/auth/register', { username, password, email })
 }
 
-export const logout = () => {
-    return axios.post('/api/admin/logout')
-}
 
 // ----------------------
 // 用户管理
@@ -24,11 +21,11 @@ export const getUserList = (params?: {
     page?: number
     pageSize?: number
 }) => {
-    return axios.get('/api/admin/users', { params })
+    return axios.get('/admin/users', { params })
 }
 
 export const getUserById = (userId: number) => {
-    return axios.get(`/api/admin/users/${userId}`)
+    return axios.get(`/admin/users/${userId}`)
 }
 
 export const updateUser = (userId: number, data: {
@@ -37,52 +34,52 @@ export const updateUser = (userId: number, data: {
     points?: number
     isMerchant?: string
 }) => {
-    return axios.put(`/api/admin/users/${userId}`, data)
+    return axios.put(`/admin/users/${userId}`, data)
 }
 
 // ----------------------
 // 景点 / 景区管理
 // ----------------------
 export const getSpotList = () => {
-    return axios.get('/api/admin/spots')
+    return axios.get('/admin/spots')
 }
 
 export const createSpot = (data: any) => {
-    return axios.post('/api/admin/spots', data)
+    return axios.post('/admin/spots', data)
 }
 
 export const updateSpot = (spotId: number, data: any) => {
-    return axios.put(`/api/admin/spots/${spotId}`, data)
+    return axios.put(`/admin/spots/${spotId}`, data)
 }
 
 export const deleteSpot = (spotId: number) => {
-    return axios.delete(`/api/admin/spots/${spotId}`)
+    return axios.delete(`/admin/spots/${spotId}`)
 }
 
 // ----------------------
 // 打卡点管理
 // ----------------------
 export const getCheckpoints = () => {
-    return axios.get('/api/admin/checkpoints')
+    return axios.get('/admin/checkpoints')
 }
 
 export const createCheckpoint = (data: any) => {
-    return axios.post('/api/admin/checkpoints', data)
+    return axios.post('/admin/checkpoints', data)
 }
 
 export const updateCheckpoint = (id: number, data: any) => {
-    return axios.put(`/api/admin/checkpoints/${id}`, data)
+    return axios.put(`/admin/checkpoints/${id}`, data)
 }
 
 export const deleteCheckpoint = (id: number) => {
-    return axios.delete(`/api/admin/checkpoints/${id}`)
+    return axios.delete(`/admin/checkpoints/${id}`)
 }
 
 // ----------------------
 // 获取积分规则列表
 // ----------------------
 export const getPointRules = () => {
-    return axios.get('/api/admin/points/rules')
+    return axios.get('/admin/points/rules')
 }
 
 // ----------------------
@@ -94,7 +91,7 @@ export const createPointRule = (data: {
     points: number
     status: string
 }) => {
-    return axios.post('/api/admin/points/rules', data)
+    return axios.post('/admin/points/rules', data)
 }
 
 // ----------------------
@@ -105,14 +102,14 @@ export const updatePointRule = (ruleId: number, data: {
     points?: number
     status?: string
 }) => {
-    return axios.put(`/api/admin/points/rules/${ruleId}`, data)
+    return axios.put(`/admin/points/rules/${ruleId}`, data)
 }
 
 // ----------------------
 // 删除积分规则
 // ----------------------
 export const deletePointRule = (ruleId: number) => {
-    return axios.delete(`/api/admin/points/rules/${ruleId}`)
+    return axios.delete(`/admin/points/rules/${ruleId}`)
 }
 
 // 获取用户积分流水
@@ -121,7 +118,7 @@ export const getUserPointLogs = (userId: number, params?: {
     endDate?: string
     type?: string
 }) => {
-    return axios.get(`/api/admin/points/users/${userId}/logs`, { params })
+    return axios.get(`/admin/points/users/${userId}/logs`, { params })
 }
 
 
@@ -133,24 +130,24 @@ export const getGifts = (params?: {
     status?: string
     keyword?: string
 }) => {
-    return axios.get('/api/admin/gifts', { params })
+    return axios.get('/admin/gifts', { params })
 }
 
 export const createGift = (data: any) => {
-    return axios.post('/api/admin/gifts', data)
+    return axios.post('/admin/gifts', data)
 }
 
 export const updateGift = (giftId: number, data: any) => {
-    return axios.put(`/api/admin/gifts/${giftId}`, data)
+    return axios.put(`/admin/gifts/${giftId}`, data)
 }
 
 export const deleteGift = (giftId: number) => {
-    return axios.delete(`/api/admin/gifts/${giftId}`)
+    return axios.delete(`/admin/gifts/${giftId}`)
 }
 
 // 调整礼品库存
 export const updateGiftStock = (giftId: number, stock: number) => {
-    return axios.patch(`/api/admin/gifts/${giftId}/stock`, { stock })
+    return axios.patch(`/admin/gifts/${giftId}/stock`, { stock })
 }
 
 // 获取礼品兑换记录
@@ -158,5 +155,5 @@ export const getGiftRedeems = (giftId: number, params?: {
     startDate?: string
     endDate?: string
 }) => {
-    return axios.get(`/api/admin/gifts/${giftId}/redeems`, { params })
+    return axios.get(`/admin/gifts/${giftId}/redeems`, { params })
 }

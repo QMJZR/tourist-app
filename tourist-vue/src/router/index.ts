@@ -9,6 +9,8 @@ import UserPointLogs from "@/views/Points/UserPointLogs.vue";
 import GiftList from "@/views/Gifts/GiftList.vue";
 import UserList from "@/views/Users/UserList.vue";
 import MerchantStats from "@/views/MerchantStats.vue";
+import { useUserStore } from '@/store/user';
+import { createPinia } from 'pinia';
 const routes: Array<RouteRecordRaw> = [
     { path: '/login', name: 'Login', component: Login },
     { path: '/register', name: 'Register', component: Register },
@@ -35,9 +37,13 @@ const router = createRouter({
     routes
 })
 
+// 创建Pinia实例用于路由守卫
+const pinia = createPinia();
+
 // 路由守卫
 router.beforeEach((to, from, next) => {
-    const token = sessionStorage.getItem('token')
+    const userStore = useUserStore(pinia);
+    const token = userStore.token;
     if (to.meta.requiresAuth && !token) {
         next('/login')
     } else {
