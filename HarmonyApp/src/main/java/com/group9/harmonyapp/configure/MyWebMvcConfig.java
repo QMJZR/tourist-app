@@ -31,19 +31,19 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/favicon.ico")
-                .excludePathPatterns("/api/v1/auth/*")
-                .excludePathPatterns("/api/v1/zones")
-                .excludePathPatterns("/api/v1/spots")
-                .excludePathPatterns("/api/v1/spots/*")
-                .excludePathPatterns("/admin/**")
+                .excludePathPatterns("/api/auth/*")
+                .excludePathPatterns("/api/zones")
+                .excludePathPatterns("/api/spots")
+                .excludePathPatterns("/api/spots/*")
+                .excludePathPatterns("/api/admin/**")
+                .excludePathPatterns("/api/checkin/spots")
                 .excludePathPatterns("/error")
-                .excludePathPatterns("/api/v1/checkin/spots")
                 .order(2);
 
         // 管理端拦截器，仅作用于 /admin/**，排除 /admin/auth/**
         registry.addInterceptor(adminInterceptor)
-                .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/auth/**")
+                .addPathPatterns("/api/admin/**")
+                .excludePathPatterns("/api/admin/auth/**")
                 .order(1);
     }
 

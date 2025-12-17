@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/V1/feeds")
+@RequestMapping("/api/feeds")
 @RequiredArgsConstructor
 public class FeedController {
 
