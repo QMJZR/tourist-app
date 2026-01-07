@@ -36,6 +36,7 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/api/spots")
                 .excludePathPatterns("/api/spots/*")
                 .excludePathPatterns("/api/admin/**")
+                .excludePathPatterns("/api/**")
                 .excludePathPatterns("/api/checkin/spots")
                 .excludePathPatterns("/error")
                 .order(2);
@@ -43,6 +44,7 @@ public class MyWebMvcConfig implements WebMvcConfigurer {
         // 管理端拦截器，仅作用于 /admin/**，排除 /admin/auth/**
         registry.addInterceptor(adminInterceptor)
                 .addPathPatterns("/api/admin/**")
+                .excludePathPatterns("/api/**")
                 .excludePathPatterns("/api/admin/auth/**")
                 .order(1);
     }
