@@ -1,5 +1,7 @@
 import { http } from "@kit.NetworkKit"
+import { BASE_URL } from '../api/baseurl';
 import StorageUtil from "../utils/Storage"
+
 export class RegisterRequest {
   username: string = '';
   password: string = '';
@@ -38,7 +40,7 @@ export async function register(RegisterData: RegisterRequest): Promise<string> {
 
   try {
     const response = await request.request(
-      "http://10.54.37.27:8080/api/v1/auth/register",  // 注意：http:// 不是 https://
+      `$\{BASE_URL}/api/auth/register`,  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.POST,
         header: {
@@ -104,7 +106,7 @@ export async function login(loginData: LoginRequest): Promise<LoginApiResponse |
 
   try {
     const response = await request.request(
-      "http://10.54.35.223:8080/api/v1/auth/login",
+      `${BASE_URL}/api/auth/login`,
       {
         method: http.RequestMethod.POST,
         header: {
@@ -181,7 +183,7 @@ export async function getProfile(): Promise<ProfileApiResponse | void> {
     const userId = await StorageUtil.getUserId();
     console.log("when getProfile, i got userId:", userId);
     const response = await request.request(
-      `http://10.54.35.223:8080/api/v1/auth/profile?userId=${userId}`,
+      `${BASE_URL}/api/auth/profile?userId=${userId}`,
       {
         method: http.RequestMethod.GET,
         header: {
@@ -253,7 +255,7 @@ export async function updateProfile(updateData: UpdateProfileRequest): Promise<U
     console.log('🔍 DEBUG: Token length =', token.length);
 
     const response = await request.request(
-      "http://10.54.35.223:8080/user/profile",
+      `$\{BASE_URL}/api/user/profile`,
       {
         method: http.RequestMethod.PUT,
         header: {

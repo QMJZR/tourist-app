@@ -2,7 +2,7 @@
 
 import { http } from "@kit.NetworkKit";
 import StorageUtil from "../utils/Storage";
-
+import { BASE_URL } from '../api/baseurl';
 // ==================== 附近推荐相关接口定义 ====================
 
 /**
@@ -77,7 +77,7 @@ export async function getNearbyRecommendations(params: GetNearbyParams): Promise
     const type = params.type || 'all';
     const page = params.page || 1;
 
-    const url = `http://10.54.37.27:8080/recommend/nearby?latitude=${latitude}&longitude=${longitude}&sort=${sort}&type=${type}&page=${page}`;
+    const url = `${BASE_URL}/recommend/nearby?latitude=${latitude}&longitude=${longitude}&sort=${sort}&type=${type}&page=${page}`;
     console.log('🔍 DEBUG: 请求URL =', url);
 
     const response = await request.request(

@@ -53,7 +53,7 @@ export async function getFeeds(params?: FeedsParams): Promise<PageResponse<FeedI
     console.log('[DEBUG] Token:', token); // 查看token是否正常
 
     // 修正路径：根据后端是 /feeds
-    let url = "http://10.54.35.223:8080/api/V1/feeds";
+    let url = "http://10.52.9.10:8080/api/V1/feeds";
 
     if (params) {
       const queryParts: string[] = [];
@@ -136,7 +136,7 @@ export async function likeFeed(feedId: number): Promise<LikeResponseData | void>
     }
 
     // 修正路径：根据后端是 /feeds/{id}/like
-    const url = `http://10.54.35.223:8080/api/V1/feeds/${feedId}/like`;
+    const url = `http://10.52.9.10:8080/api/V1/feeds/${feedId}/like`;
 
     console.log("[DEBUG] likeFeed 请求URL:", url);
 
@@ -191,7 +191,7 @@ export async function unlikeFeed(feedId: number): Promise<LikeResponseData | voi
     }
 
     // 修正路径：根据后端是 /feeds/{id}/like
-    const url = `http://10.54.35.223:8080/api/V1/feeds/${feedId}/like`;
+    const url = `http://10.52.9.10:8080/api/V1/feeds/${feedId}/like`;
 
     console.log("[DEBUG] unlikeFeed 请求URL:", url);
 

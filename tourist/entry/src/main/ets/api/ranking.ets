@@ -2,6 +2,7 @@
 
 import { http } from "@kit.NetworkKit";
 import StorageUtil from "../utils/Storage";
+import { BASE_URL } from '../api/baseurl';
 
 // ==================== 排行榜相关接口定义 ====================
 
@@ -72,7 +73,7 @@ export async function getRankings(params: GetRankingsParams = {}): Promise<Ranki
     const page = params.page || 1;
     const sort = params.sort || 'points';
 
-    const url = `http://10.54.37.27:8080/rankings?period=${period}&page=${page}&sort=${sort}`;
+    const url = `${BASE_URL}/rankings?period=${period}&page=${page}&sort=${sort}`;
     console.log('🔍 DEBUG: 请求URL =', url);
 
     const response = await request.request(

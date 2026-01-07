@@ -1,6 +1,6 @@
 import {http} from "@kit.NetworkKit"
 import StorageUtil from '../utils/Storage'
-
+import { BASE_URL } from '../api/baseurl';
 export interface GetReq {
   lat:number;
   lng:number;
@@ -27,7 +27,7 @@ export async function getCheckInSpots(data:GetReq): Promise<GetCheckInData[] | v
   let request = http.createHttp();
   try {
     const response = await request.request(
-      "http://10.54.35.223:8080/api/v1/checkin/spots",  // 注意：http:// 不是 https://
+      `${BASE_URL}/api/checkin/spots`,  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.GET,
         header: {
@@ -136,10 +136,10 @@ export async function Submit(data:SubmitReq): Promise<SubmitResData | void> {
     console.log("[DEBUG] 获取到的Token:", token);
 
     console.log("[DEBUG] Submit 请求数据:", data);
-    console.log("[DEBUG] Submit 请求URL:", "http://10.54.35.223:8080/api/v1/checkin/submit");
+    console.log("[DEBUG] Submit 请求URL:", `$\{BASE_URL}/api/checkin/submit`);
 
     const response = await request.request(
-      "http://10.54.35.223:8080/api/v1/checkin/submit",
+      `${BASE_URL}/api/checkin/submit`,
       {
         method: http.RequestMethod.POST,  // 关键修改
         header: {
