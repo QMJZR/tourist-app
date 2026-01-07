@@ -42,8 +42,8 @@ const pinia = createPinia();
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
-    const userStore = useUserStore(pinia);
-    const token = userStore.token;
+    const token = localStorage.getItem('token')
+
     if (to.meta.requiresAuth && !token) {
         next('/login')
     } else {

@@ -9,7 +9,7 @@
       <el-table-column prop="spotId" label="景点ID" width="120" />
       <el-table-column prop="latitude" label="纬度" width="120" />
       <el-table-column prop="longitude" label="经度" width="120" />
-      <el-table-column prop="openTime" label="开放时间" width="120" />
+      <el-table-column prop="openTime" label="有效打卡点半径" width="120" />
       <el-table-column label="操作" width="180">
         <template #default="scope">
           <el-button type="primary" size="small" @click="openDialog(scope.row)">编辑</el-button>
@@ -27,8 +27,7 @@
         <el-form-item label="景点ID"><el-input v-model.number="form.spotId" /></el-form-item>
         <el-form-item label="纬度"><el-input v-model.number="form.latitude" /></el-form-item>
         <el-form-item label="经度"><el-input v-model.number="form.longitude" /></el-form-item>
-        <el-form-item label="开放时间"><el-input v-model="form.openTime" /></el-form-item>
-        <el-form-item label="描述"><el-input type="textarea" v-model="form.description" /></el-form-item>
+        <el-form-item label="有效打卡点半径"><el-input v-model="form.radius" /></el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -48,8 +47,7 @@ interface Checkpoint {
   spotId: number
   latitude: number
   longitude: number
-  openTime?: string
-  description?: string
+  radius: number
 }
 
 const checkpoints = ref<Checkpoint[]>([])
@@ -61,8 +59,7 @@ const form = reactive<Checkpoint>({
   spotId: 0,
   latitude: 0,
   longitude: 0,
-  openTime: '',
-  description: ''
+  radius:10
 })
 
 const fetchCheckpoints = async () => {
@@ -72,7 +69,7 @@ const fetchCheckpoints = async () => {
 
 const openDialog = (checkpoint?: Checkpoint) => {
   if (checkpoint) Object.assign(form, checkpoint), editCheckpoint.value = checkpoint
-  else Object.assign(form, { name: '', spotId: 0, latitude: 0, longitude: 0, openTime: '', description: '' }), editCheckpoint.value = null
+  else Object.assign(form, { name: '', spotId: 0, latitude: 0, longitude: 0, radius:10 }), editCheckpoint.value = null
   dialogVisible.value = true
 }
 

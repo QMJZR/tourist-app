@@ -9,13 +9,24 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     viteMockServe({
-      mockPath: 'src/mock',       // mock 文件夹路径，自己建在 src/mock 或项目根目录
-      localEnabled: true,     // 开发环境启用
-      prodEnabled: false,     // 生产环境禁用
-      supportTs: true,        // 支持 ts 文件
-      watchFiles: true,       // 文件修改时热更新
+      mockPath: 'src/mock',
+      localEnabled: false,
+      prodEnabled: false,
+      supportTs: true,
+      watchFiles: true,
     })
   ],
+
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      }
+    }
+  },
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

@@ -4,7 +4,7 @@
     <el-button type="primary" @click="openDialog()">新增景点</el-button>
 
     <el-table :data="spots" style="width: 100%; margin-top: 20px;">
-      <el-table-column prop="spotId" label="ID" width="80" />
+      <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="name" label="名称" />
       <el-table-column prop="zoneId" label="引领区ID" width="120" />
       <el-table-column prop="latitude" label="纬度" width="120" />
@@ -12,8 +12,8 @@
       <el-table-column prop="openTime" label="开放时间" width="120" />
       <el-table-column label="操作" width="180">
         <template #default="scope">
-          <el-button type="primary" size="small" @click="openDialog(scope.row)">编辑</el-button>
-          <el-button type="danger" size="small" @click="handleDeleteSpot(scope.row.spotId)">删除</el-button>
+          <el-button type="primary" size="small" @click="openDialog(scope.row) ">编辑</el-button>
+          <el-button type="danger" size="small" @click="handleDeleteSpot(scope.row.id)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -21,11 +21,17 @@
     <!-- 弹窗表单 -->
     <el-dialog
         v-model="dialogVisible"
-        :title="editSpot?.spotId ? '编辑景点' : '新增景点'"
+        :title="editSpot?.id ? '编辑景点' : '新增景点'"
     >
       <el-form :model="form" label-width="100px">
         <el-form-item label="名称">
           <el-input v-model="form.name" />
+        </el-form-item>
+        <el-form-item label="图片url">
+          <el-input v-model="form.image" />
+        </el-form-item>
+        <el-form-item label="视频url">
+          <el-input v-model="form.video" />
         </el-form-item>
         <el-form-item label="引领区ID">
           <el-input v-model.number="form.zoneId" />
@@ -58,8 +64,10 @@ import { getSpotList, createSpot, updateSpot, deleteSpot } from '@/api/admin'
 const dialogVisible = ref(false)
 
 interface Spot {
-  spotId?: number
+  id?: number
   name: string
+  image: string
+  video: string
   zoneId: number
   latitude: number
   longitude: number
@@ -72,6 +80,8 @@ const editSpot = ref<Spot | null>(null)
 
 const form = reactive<Spot>({
   name: '',
+  image: 'photosample.com.spot1.jpg',
+  video: 'videosample.com.spot1.jpg',
   zoneId: 0,
   latitude: 0,
   longitude: 0,
@@ -83,6 +93,7 @@ const fetchSpots = async () => {
   const res = await getSpotList()
   if (res.data.code === 200) {
     spots.value = res.data.data
+    console.log('接口返回的景点列表：', res.data.data)
   }
 }
 
@@ -100,9 +111,9 @@ const openDialog = (spot?: Spot) => {
 }
 
 const saveSpot = async () => {
-  if (editSpot.value && editSpot.value.spotId) {
+  if (editSpot.value && editSpot.value.id) {
     // 更新
-    const res = await updateSpot(editSpot.value.spotId, form)
+    const res = await updateSpot(editSpot.value.id, form)
     if (res.data.code === 200) {
       fetchSpots()
       dialogVisible.value = false
@@ -117,9 +128,9 @@ const saveSpot = async () => {
   }
 }
 
-const handleDeleteSpot = async (spotId: number) => {
+const handleDeleteSpot = async (id: number) => {
   if (confirm('确定删除吗？')) {
-    const res = await deleteSpot(spotId)
+    const res = await deleteSpot(id)
     if (res.data.code === 200) {
       fetchSpots()
     }

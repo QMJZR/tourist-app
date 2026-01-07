@@ -4,11 +4,11 @@ import axios from '../utils/axiosConfig'
 // 登录 / 登出 /注册
 // ----------------------
 export const login = (username: string, password: string) => {
-    return axios.post('/v1/admin/auth/login', { username, password })
+    return axios.post('/admin/auth/login', { username, password })
 }
 
 export const register = (username: string, password: string, email: string) => {
-    return axios.post('/v1/admin/auth/register', { username, password, email })
+    return axios.post('/admin/auth/register', { username, password, email })
 }
 
 
