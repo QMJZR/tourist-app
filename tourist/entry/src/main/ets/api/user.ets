@@ -49,7 +49,7 @@ export async function register(RegisterData: RegisterRequest): Promise<string> {
     );
     if (response.responseCode === 200 || response.responseCode === 201) {
       console.log("注册请求成功");
-
+      console.log(String(response.result));
       // 安全地获取结果
       if (response.result) {
         return String(response.result);
