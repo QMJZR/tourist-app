@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from '../utils/axiosConfig' 
 
 // ----------------------
 // 商家核销礼品

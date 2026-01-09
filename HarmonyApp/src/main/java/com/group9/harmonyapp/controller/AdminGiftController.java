@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/admin/gifts")
+@RequestMapping("/api/admin/gifts")
 @RequiredArgsConstructor
 public class AdminGiftController {
 

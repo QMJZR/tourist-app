@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/merchant")
+@RequestMapping("/api/merchant")
 public class MerchantController {
 
     private final TokenUtil tokenUtil;

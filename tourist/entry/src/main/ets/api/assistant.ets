@@ -2,7 +2,7 @@
 
 import { http } from "@kit.NetworkKit"
 import StorageUtil from "../utils/Storage"
-
+import { BASE_URL } from '../api/baseurl';
 // ==================== 请求接口定义 ====================
 
 /**
@@ -72,7 +72,7 @@ export async function askAssistant(askData: AskAssistantRequest): Promise<AskAss
     console.log('🔍 DEBUG: Token length =', token.length);
 
     const response = await request.request(
-      "http://10.54.37.27:8080/assistant/ask",
+      `${BASE_URL}/assistant/ask`,
       {
         method: http.RequestMethod.POST,
         header: {

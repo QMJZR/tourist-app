@@ -15,7 +15,7 @@ export async function getZones(): Promise<ZoneItem[] | void> {
   let request = http.createHttp();
   try {
     const response = await request.request(
-      "http://10.54.35.223:8080/api/v1/zones",  // 注意：http:// 不是 https://
+      "http://10.52.9.10:8080/api/v1/zones",  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.GET,
         header: {
@@ -170,7 +170,7 @@ export interface SpotRequest {
 export async function getSpots(params?: SpotRequest): Promise<PageResponse<SpotListItem> | void> {
   let request = http.createHttp();
   try {
-    let url = "http://10.54.35.223:8080/api/v1/spots";
+    let url = "http://10.52.9.10:8080/api/v1/spots";
     if (params) {
       const queryParts: string[] = [];
 
@@ -245,7 +245,7 @@ export async function getSpotDetail(id:number): Promise<SpotDetail | void> {
   let request = http.createHttp();
   try {
     const response = await request.request(
-      `http://10.54.35.223:8080/api/v1/spots/${id}`,  // 注意：http:// 不是 https://
+      `http://10.52.9.10:8080/api/v1/spots/${id}`,  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.GET,
         header: {

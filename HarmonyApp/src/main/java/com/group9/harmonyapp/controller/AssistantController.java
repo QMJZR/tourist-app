@@ -7,7 +7,7 @@ import com.group9.harmonyapp.service.AssistantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping("/assistant")
+@RequestMapping("/api/assistant")
 @RequiredArgsConstructor
 public class AssistantController {
 

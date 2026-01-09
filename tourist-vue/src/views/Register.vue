@@ -61,7 +61,7 @@ const register = async () => {
       ElMessage.success('注册成功，跳转登录页')
       router.push('/login')
     } else {
-      ElMessage.error(res.data.message)
+      ElMessage.error(res.data.msg)
     }
   } catch (e) {
     ElMessage.error('注册失败')

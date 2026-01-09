@@ -25,15 +25,40 @@ public class LoginInterceptor implements HandlerInterceptor {
     TokenUtil tokenUtil;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String token = request.getHeader("Authorization").substring(7);
-        if (token != null && tokenUtil.verifyToken(token)) {
-            request.getSession().setAttribute("currentUser",tokenUtil.getUser(token));
+    public boolean preHandle(HttpServletRequest request,
+                             HttpServletResponse response,
+                             Object handler) {
+
+        // ✅ 1️⃣ 放行 OPTIONS
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return true;
-        }else {
-            System.out.print("拦截路径: " + request.getRequestURI());
+        }
+
+        String uri = request.getRequestURI();
+
+        // ✅ 2️⃣ 放行登录 / 注册
+        if (uri.contains("/auth/login") || uri.contains("/auth/register")) {
+            return true;
+        }
+
+        // ✅ 3️⃣ 再取 header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw HarmonyException.notLogin();
         }
+
+        String token = authHeader.substring(7);
+
+        if (!tokenUtil.verifyToken(token)) {
+            throw HarmonyException.notLogin();
+        }
+
+        request.getSession().setAttribute(
+                "currentUser",
+                tokenUtil.getUser(token)
+        );
+
+        return true;
     }
 
 }

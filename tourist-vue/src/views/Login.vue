@@ -46,6 +46,7 @@ import { reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { login as apiLogin } from '@/api/admin'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/store/user'
 
 interface LoginForm {
   username: string
@@ -53,6 +54,7 @@ interface LoginForm {
 }
 
 const router = useRouter()
+const userStore = useUserStore()
 const form = reactive<LoginForm>({ username: '', password: '' })
 
 const login = async () => {
@@ -63,12 +65,14 @@ const login = async () => {
 
   try {
     const res = await apiLogin(form.username, form.password)
-    if (res.data.code === 200) {
-      sessionStorage.setItem('token', res.data.data.token)
+    // 从res.data中获取后端返回的数据
+    const responseData = res.data
+    if (responseData.code === 200) {
+      userStore.setToken(responseData.data.token)
       ElMessage.success('登录成功')
       router.push('/')
     } else {
-      ElMessage.error(res.data.message)
+      ElMessage.error(responseData.msg)
     }
   } catch (e) {
     ElMessage.error('登录失败')
