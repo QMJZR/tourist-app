@@ -73,7 +73,7 @@ export async function getRankings(params: GetRankingsParams = {}): Promise<Ranki
     const page = params.page || 1;
     const sort = params.sort || 'points';
 
-    const url = `${BASE_URL}/rankings?period=${period}&page=${page}&sort=${sort}`;
+    const url = `${BASE_URL}/api/rankings?period=${period}&page=${page}&sort=${sort}`;
     console.log('🔍 DEBUG: 请求URL =', url);
 
     const response = await request.request(

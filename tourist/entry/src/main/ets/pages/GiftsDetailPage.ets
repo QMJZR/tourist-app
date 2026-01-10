@@ -13,7 +13,7 @@ interface GiftRecordLocal {
 }
 
 // 礼品类型定义
-type GiftStatus = 'all' | 'available' | 'redeemed' | 'expired';
+type GiftStatus = '' | 'available' | 'redeemed' | 'expired';
 
 // 筛选按钮类型
 interface FilterButton {
@@ -24,19 +24,20 @@ interface FilterButton {
 @Entry
 @Component
 struct GiftsDetailPage {
-  @State totalGifts: number = 0;  // 礼品总数
-  @State totalAvailable: number = 0;  // 可兑换礼品数
-  @State totalRedeemed: number = 0;  // 已兑换礼品数
-  @State giftsRecords: Array<GiftRecordLocal> = [];  // 礼品记录列表
+  @State totalGifts: number = 0;  // 礼品总数（基于全部数据）
+  @State totalAvailable: number = 0;  // 可兑换礼品数（基于全部数据）
+  @State totalRedeemed: number = 0;  // 已兑换礼品数（基于全部数据）
+  @State allGiftsRecords: Array<GiftRecordLocal> = [];  // 全部礼品记录列表
+  @State filteredRecords: Array<GiftRecordLocal> = [];  // 筛选后的礼品记录列表
   @State currentPage: number = 1;  // 当前页码
   @State totalPages: number = 1;  // 总页数
 
   // 礼品筛选状态
-  @State currentFilter: GiftStatus = 'all';  // 当前筛选状态
+  @State currentFilter: GiftStatus = '';  // 当前筛选状态
 
   // 使用明确的类型声明筛选按钮数组
   private filterButtons: Array<FilterButton> = [
-    {label: '全部', value: 'all'},
+    {label: '全部', value: ''},
     {label: '可兑换', value: 'available'},
     {label: '已兑换', value: 'redeemed'}
   ];
@@ -63,58 +64,15 @@ struct GiftsDetailPage {
     this.isError = false;
 
     try {
-      // 使用显式类型声明apiResult变量
-      let apiResult: GiftsApiResponse | void | undefined;
-
-      // 根据筛选状态调用不同的API函数
-      if (this.currentFilter === 'available') {
-        apiResult = await getAvailableGifts(this.currentPage);
-      } else if (this.currentFilter === 'redeemed') {
-        apiResult = await getRedeemedGifts(this.currentPage);
+      // 根据当前筛选状态决定加载的数据类型
+      if (this.currentFilter === '') {
+        // 加载全部数据
+        await this.loadAllGiftsData();
       } else {
-        apiResult = await getGifts(this.currentPage, this.currentFilter);
+        // 加载筛选数据
+        await this.loadFilteredGiftsData();
       }
 
-      // 简化类型检查：先判断是否有结果
-      if (!apiResult) {
-        this.isError = true;
-        this.errorMessage = '获取礼品数据失败：无返回结果';
-        console.log('❌ 获取礼品数据失败：无返回结果');
-        return;
-      }
-
-      // 现在apiResult肯定不是void类型，进行类型断言
-      const result = apiResult as GiftsApiResponse;
-
-      if (result.code === 200 && result.data) {
-        // 确保获取到的是数组类型
-        const list: Array<GiftRecordLocal> = (result.data.list || []) as Array<GiftRecordLocal>;
-        const total: number = result.data.total || 0;
-
-        // 使用 concat 代替展开运算符
-        if (this.currentPage === 1) {
-          this.giftsRecords = list;
-        } else {
-          this.giftsRecords = this.giftsRecords.concat(list);
-        }
-
-        this.totalGifts = total;
-
-        // 计算总页数
-        const pageSize = 10;  // 默认每页10条
-        this.totalPages = Math.ceil(total / pageSize);
-
-        // 统计不同状态的礼品数量
-        this.updateGiftCounts();
-
-        console.log(`✅ 加载礼品数据成功，共${this.totalGifts}条记录，当前第${this.currentPage}页`);
-      } else {
-        this.isError = true;
-        // 使用安全的方式访问msg属性
-        const errorMsg = result.msg || '获取礼品数据失败';
-        this.errorMessage = `错误：${errorMsg}`;
-        console.log('❌ 获取礼品数据失败:', errorMsg);
-      }
     } catch (error) {
       this.isError = true;
       this.errorMessage = '网络请求失败，请检查网络连接';
@@ -125,25 +83,118 @@ struct GiftsDetailPage {
     }
   }
 
-  // 更新礼品数量统计
+  // 加载全部礼品数据
+  private async loadAllGiftsData() {
+    const apiResult = await getGifts(this.currentPage, this.currentFilter);
+
+    // 简化类型检查：先判断是否有结果
+    if (!apiResult) {
+      this.isError = true;
+      this.errorMessage = '获取礼品数据失败：无返回结果';
+      console.log('❌ 获取礼品数据失败：无返回结果');
+      return;
+    }
+
+    const result = apiResult as GiftsApiResponse;
+
+    if (result.code === 200 && result.data) {
+      // 确保获取到的是数组类型
+      const list: Array<GiftRecordLocal> = (result.data.list || []) as Array<GiftRecordLocal>;
+      const total: number = result.data.total || 0;
+
+      // 使用 concat 代替展开运算符
+      if (this.currentPage === 1) {
+        this.allGiftsRecords = list;
+      } else {
+        this.allGiftsRecords = this.allGiftsRecords.concat(list);
+      }
+
+      this.filteredRecords = [...this.allGiftsRecords]; // 筛选记录等于全部记录
+      this.totalGifts = total;
+
+      // 计算总页数
+      const pageSize = 10;  // 默认每页10条
+      this.totalPages = Math.ceil(total / pageSize);
+
+      // 更新礼品数量统计
+      this.updateGiftCounts();
+
+      console.log(`✅ 加载全部礼品数据成功，共${this.totalGifts}条记录，当前第${this.currentPage}页`);
+    } else {
+      this.isError = true;
+      const errorMsg = result.msg || '获取礼品数据失败';
+      this.errorMessage = `错误：${errorMsg}`;
+      console.log('❌ 获取礼品数据失败:', errorMsg);
+    }
+  }
+
+  // 加载筛选后的礼品数据
+  private async loadFilteredGiftsData() {
+    let apiResult: GiftsApiResponse | void | undefined;
+
+    if (this.currentFilter === 'available') {
+      apiResult = await getAvailableGifts(this.currentPage);
+    } else if (this.currentFilter === 'redeemed') {
+      apiResult = await getRedeemedGifts(this.currentPage);
+    }
+
+    if (!apiResult) {
+      this.isError = true;
+      this.errorMessage = '获取筛选数据失败：无返回结果';
+      console.log('❌ 获取筛选数据失败：无返回结果');
+      return;
+    }
+
+    const result = apiResult as GiftsApiResponse;
+
+    if (result.code === 200 && result.data) {
+      const list: Array<GiftRecordLocal> = (result.data.list || []) as Array<GiftRecordLocal>;
+      const total: number = result.data.total || 0;
+
+      // 更新筛选记录
+      if (this.currentPage === 1) {
+        this.filteredRecords = list;
+      } else {
+        this.filteredRecords = this.filteredRecords.concat(list);
+      }
+
+      // 更新总页数（仅针对筛选结果）
+      const pageSize = 10;
+      this.totalPages = Math.ceil(total / pageSize);
+
+      console.log(`✅ 加载筛选礼品数据成功，共${this.filteredRecords.length}条记录，当前第${this.currentPage}页`);
+    } else {
+      this.isError = true;
+      const errorMsg = result.msg || '获取筛选数据失败';
+      this.errorMessage = `错误：${errorMsg}`;
+      console.log('❌ 获取筛选数据失败:', errorMsg);
+    }
+  }
+
+  // 更新礼品数量统计（基于全部数据）
   private updateGiftCounts() {
-    // 使用显式类型转换和过滤
-    const availableCount = this.giftsRecords.filter((gift: GiftRecordLocal) =>
+    // 使用全部礼品记录计算统计
+    const availableCount = this.allGiftsRecords.filter((gift: GiftRecordLocal) =>
     gift.status === 'available'
     ).length;
 
-    const redeemedCount = this.giftsRecords.filter((gift: GiftRecordLocal) =>
+    const redeemedCount = this.allGiftsRecords.filter((gift: GiftRecordLocal) =>
     gift.status === 'redeemed'
     ).length;
 
     this.totalAvailable = availableCount;
     this.totalRedeemed = redeemedCount;
+
+    // 确保总数是正确的
+    this.totalGifts = this.allGiftsRecords.length;
   }
 
   // 刷新数据
   private async refreshData() {
     this.currentPage = 1;
     this.isRefreshing = true;
+    this.allGiftsRecords = [];  // 清空全部记录
+    this.filteredRecords = [];  // 清空筛选记录
     await this.loadGiftsData();
   }
 
@@ -157,35 +208,13 @@ struct GiftsDetailPage {
     this.isLoading = true;
 
     try {
-      // 使用显式类型声明apiResult变量
-      let apiResult: GiftsApiResponse | void | undefined;
-
-      if (this.currentFilter === 'available') {
-        apiResult = await getAvailableGifts(this.currentPage);
-      } else if (this.currentFilter === 'redeemed') {
-        apiResult = await getRedeemedGifts(this.currentPage);
+      // 根据当前筛选状态加载更多数据
+      if (this.currentFilter === '') {
+        // 加载更多全部数据
+        await this.loadAllGiftsData();
       } else {
-        apiResult = await getGifts(this.currentPage, this.currentFilter);
-      }
-
-      // 简化类型检查
-      if (!apiResult) {
-        console.log('加载更多失败：无返回结果');
-        this.currentPage -= 1;
-        return;
-      }
-
-      const result = apiResult as GiftsApiResponse;
-
-      if (result.code === 200 && result.data) {
-        // 追加数据 - 使用 concat 代替展开运算符
-        const newRecords: Array<GiftRecordLocal> = (result.data.list || []) as Array<GiftRecordLocal>;
-        this.giftsRecords = this.giftsRecords.concat(newRecords);
-
-        // 更新统计
-        this.updateGiftCounts();
-
-        console.log(`✅ 加载更多成功，当前共${this.giftsRecords.length}条记录`);
+        // 加载更多筛选数据
+        await this.loadFilteredGiftsData();
       }
     } catch (error) {
       console.error('加载更多异常:', error);
@@ -204,8 +233,16 @@ struct GiftsDetailPage {
 
     this.currentFilter = filter;
     this.currentPage = 1;
-    this.giftsRecords = [];
-    this.loadGiftsData();
+
+    if (filter === '') {
+      // 切换到"全部"时，显示全部记录
+      this.filteredRecords = [...this.allGiftsRecords];
+      this.totalPages = Math.ceil(this.allGiftsRecords.length / 10);
+    } else {
+      // 切换到"可兑换"或"已兑换"时，重新加载筛选数据
+      this.filteredRecords = [];
+      this.loadFilteredGiftsData();
+    }
   }
 
   // 格式化时间（去掉秒）
@@ -269,7 +306,7 @@ struct GiftsDetailPage {
         .textAlign(TextAlign.Start)
         .width('100%')
 
-      // 礼品统计
+      // 礼品统计 - 始终显示全部礼品的统计，不随筛选变化
       Row({ space: 12 }) {
         // 可兑换礼品
         Column({ space: 4 }) {
@@ -434,28 +471,13 @@ struct GiftsDetailPage {
       .padding({ left: 16, right: 16 })
 
       // 分隔线（不是最后一项时显示）
-      if (index < this.giftsRecords.length - 1) {
+      if (index < this.filteredRecords.length - 1) {
         Divider()
           .color('#F0F0F0')
           .margin({ left: 72, right: 16 })
           .strokeWidth(0.5)
       }
     }
-  }
-
-  // 构建兑换按钮
-  @Builder
-  buildRedeemButton(gift: GiftRecordLocal) {
-    Button('立即兑换')
-      .backgroundColor('#FF9500')
-    .borderRadius(8)
-    .height(32)
-    .padding({ left: 12, right: 12 })
-    .enabled(gift.status === 'available')
-    .onClick(() => {
-      console.log('兑换礼品:', gift.name);
-      // 这里可以添加兑换逻辑
-    })
   }
 
   // 构建记录列表
@@ -469,8 +491,8 @@ struct GiftsDetailPage {
           .fontColor('#333333')
           .fontWeight(FontWeight.Bold)
 
-        if (this.totalGifts > 0) {
-          Text(`共${this.totalGifts}个`)
+        if (this.filteredRecords.length > 0) {
+          Text(`共${this.filteredRecords.length}个`)
             .fontSize(12)
             .fontColor('#666666')
             .backgroundColor('#F0F0F0')
@@ -485,23 +507,11 @@ struct GiftsDetailPage {
       this.buildFilterBar()
 
       // 礼品列表
-      if (this.giftsRecords.length > 0) {
+      if (this.filteredRecords.length > 0) {
         Column({ space: 0 }) {
-          ForEach(this.giftsRecords, (record: GiftRecordLocal, index: number) => {
+          ForEach(this.filteredRecords, (record: GiftRecordLocal, index: number) => {
             Column() {
               this.buildGiftRecordItem(record, index)
-
-              // 可兑换礼品显示兑换按钮
-              if (record.status === 'available') {
-                Row() {
-                  Row()
-                    .width(56)  // 左侧占位，对齐图标区域
-
-                  this.buildRedeemButton(record)
-                }
-                .width('100%')
-                .padding({ left: 16, right: 16, bottom: 12 })
-              }
             }
           })
         }
@@ -662,22 +672,22 @@ struct GiftsDetailPage {
       Scroll() {
         Column({ space: 0 }) {
           // 显示加载状态
-          if (this.isLoading && !this.isRefreshing && this.giftsRecords.length === 0) {
+          if (this.isLoading && !this.isRefreshing && this.filteredRecords.length === 0) {
             this.buildLoadingView()
           }
           // 显示错误状态
-          else if (this.isError && this.giftsRecords.length === 0) {
+          else if (this.isError && this.filteredRecords.length === 0) {
             this.buildErrorView()
           }
           // 显示正常内容
           else {
-            // 礼品卡片
+            // 礼品卡片 - 这里显示的统计基于全部礼品数据，永远不会改变
             Column() {
               this.buildGiftsCard()
             }
             .padding({ left: 16, right: 16, top: 20, bottom: 16 })
 
-            // 礼品记录列表
+            // 礼品记录列表 - 这里显示的是筛选后的记录
             this.buildRecordsList()
 
             // 底部安全区域占位
