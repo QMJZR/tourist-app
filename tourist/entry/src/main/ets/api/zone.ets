@@ -244,6 +244,11 @@ export interface SpotDetail {
   openTime:string;
 }
 
+export interface spotDetailResult {
+  code:number;
+  msg:string;
+  data:SpotDetail;
+}
 export async function getSpotDetail(id:number): Promise<SpotDetail | void> {
   let request = http.createHttp();
   try {
@@ -262,8 +267,8 @@ export async function getSpotDetail(id:number): Promise<SpotDetail | void> {
       // 安全地获取结果
       if (response.result) {
         const str = String(response.result);
-        const responseData: ZonesResponse = JSON.parse(str);
-        //return responseData.data;// 返回
+        const responseData: spotDetailResult = JSON.parse(str);
+        return responseData.data;// 返回
       } else {
         console.warn('响应结果为空');
         return ;  // 返回空JSON对象字符串

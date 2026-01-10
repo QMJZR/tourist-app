@@ -10,8 +10,8 @@ export interface GetReq {
 export interface GetCheckInData {
   spotId:number;
   name:string;
-  lat:number;
-  lng:number;
+  latitude:number;
+  longitude:number;
   radius:number;
   thumbnail:string;
   distance:number;

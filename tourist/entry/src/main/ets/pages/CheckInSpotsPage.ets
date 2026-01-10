@@ -57,8 +57,8 @@ interface CheckinSpot {
   latitude: number;
   longitude: number;
   radius: number;
-  thumbnail?: string;
-  distance?: number;
+  thumbnail: string;
+  distance: number;
 }
 
 // 请求参数接口
@@ -367,11 +367,12 @@ export default struct CheckinSpotsPage {
           .layoutWeight(1)
           .margin({ left: 10 })
           .onClick(() => {
-            if (spot.distance && spot.distance <= spot.radius) {
-              this.checkIn(spot.spotId);
-            } else {
-              this.viewOnMap(spot);
-            }
+            // if (spot.distance && spot.distance <= spot.radius) {
+            //   this.checkIn(spot.spotId);
+            // } else {
+            //   this.viewOnMap(spot);
+            // }
+            this.checkIn(spot.spotId);
           })
       }
       .width('100%')
@@ -422,7 +423,7 @@ export default struct CheckinSpotsPage {
   // 查看点位详情
   private viewSpotDetail(spotId: number) {
 
-    spotId = 101 // for test
+    //spotId = spotId // for test
     console.log('查看点位详情:', spotId);
     // TODO: 跳转到点位详情页面
     router.pushUrl({
@@ -481,7 +482,7 @@ export default struct CheckinSpotsPage {
   }
 
   // 加载打卡点位
-  private loadCheckinSpots() {
+  private async loadCheckinSpots() {
     console.log('开始加载打卡点位...');
     this.isLoading = true;
 
@@ -490,14 +491,20 @@ export default struct CheckinSpotsPage {
       lng:1,
       sort:"distance"
     }
-    getCheckInSpots(data)
 
-    // 暂时使用假数据
-    setTimeout(() => {
+    const result = await getCheckInSpots(data)
+    if(result && result.length > 0){
+      this.checkinSpots = result
       console.log('加载打卡点位完成');
-      this.checkinSpots = [...mockCheckinSpots];
       this.isLoading = false;
-    }, 1000);
+    }
+
+    // // 暂时使用假数据
+    // setTimeout(() => {
+    //   console.log('加载打卡点位完成');
+    //   this.checkinSpots = [...mockCheckinSpots];
+    //   this.isLoading = false;
+    // }, 1000);
   }
 
   aboutToDisappear() {
