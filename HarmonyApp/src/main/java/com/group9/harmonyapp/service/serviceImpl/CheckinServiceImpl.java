@@ -11,6 +11,7 @@ import com.group9.harmonyapp.util.GeoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,10 +29,7 @@ public class CheckinServiceImpl implements CheckinService {
      * 缓存景点列表
      * key：lat_lng_sort
      */
-    @Cacheable(
-            cacheNames = "spots:list",
-            key = "'spots_' + #lat + '_' + #lng + '_' + #sort"
-    )
+    @Cacheable(cacheNames = "spots:list", key = "'spots_' + #lat + '_' + #lng + '_' + #sort")
     @Override
     public List<SpotCheckinInfoDTO> listSpots(Double lat, Double lng, String sort) {
         try {
@@ -69,10 +67,10 @@ public class CheckinServiceImpl implements CheckinService {
      * - 用户打卡记录缓存
      * - 用户打卡分页缓存
      */
-    @CacheEvict(value = {
-            "user:checkins",
-            "user:checkins:page"
-    }, key = "#userId", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "user:checkins", key = "#userId"),
+            @CacheEvict(value = "user:checkins:page", allEntries = true)
+    })
     @Override
     public CheckinResultDTO submitCheckin(Long userId, CheckinSubmitRequest req) {
 
@@ -122,10 +120,7 @@ public class CheckinServiceImpl implements CheckinService {
     /**
      * 缓存用户打卡的所有景点 id 列表
      */
-    @Cacheable(
-            cacheNames = "user:checkins",
-            key = "#userId"
-    )
+    @Cacheable(cacheNames = "user:checkins", key = "#userId")
     @Override
     public List<CheckinRecord> getCheckinSpotsByUser(Long userId) {
         return checkinRecordRepository.findByUserId(userId);
@@ -134,10 +129,7 @@ public class CheckinServiceImpl implements CheckinService {
     /**
      * 用户分页打卡记录，需要带页码分页，因此 key 必须包含 page、pageSize
      */
-    @Cacheable(
-            cacheNames = "user:checkins:page",
-            key = "#userId + '_' + #page + '_' + #pageSize"
-    )
+    @Cacheable(cacheNames = "user:checkins:page", key = "#userId + '_' + #page + '_' + #pageSize")
     @Override
     public PageResponseDTO<CheckinRecordDTO> getUserCheckins(Long userId, int page, int pageSize) {
         try {
@@ -145,11 +137,17 @@ public class CheckinServiceImpl implements CheckinService {
 
             records.sort((a, b) -> b.getCreateTime().compareTo(a.getCreateTime()));
 
+            Set<Long> spotIds = records.stream().map(CheckinRecord::getSpotId).collect(Collectors.toSet());
+            Map<Long, Spot> spotMap = spotRepository.findAllById(spotIds).stream()
+                    .collect(Collectors.toMap(Spot::getId, s -> s));
+
             List<CheckinRecordDTO> list = records.stream().map(r -> {
                 CheckinRecordDTO dto = new CheckinRecordDTO();
                 dto.setCheckinId(r.getId());
                 dto.setSpotId(r.getSpotId());
-                Spot spot = spotRepository.findById(r.getSpotId()).orElse(null);
+
+                // 从内存 Map 中取，不查数据库
+                Spot spot = spotMap.get(r.getSpotId());
                 if (spot != null) {
                     dto.setSpotName(spot.getName());
                     dto.setImages(spot.getImages());
