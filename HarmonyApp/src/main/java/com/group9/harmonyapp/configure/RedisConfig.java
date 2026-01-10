@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -57,6 +58,7 @@ public class RedisConfig {
                 .build();
     }
     @Bean
+    @Primary
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
         // 1. 创建 ObjectMapper 并定制化
         ObjectMapper om = new ObjectMapper();

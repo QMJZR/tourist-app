@@ -129,7 +129,7 @@ public class CheckinServiceImpl implements CheckinService {
     /**
      * 用户分页打卡记录，需要带页码分页，因此 key 必须包含 page、pageSize
      */
-    @Cacheable(cacheNames = "user:checkins:page", key = "#userId + '_' + #page + '_' + #pageSize")
+//    @Cacheable(cacheNames = "user:checkins:page", key = "#userId + '_' + #page + '_' + #pageSize")
     @Override
     public PageResponseDTO<CheckinRecordDTO> getUserCheckins(Long userId, int page, int pageSize) {
         try {
@@ -138,7 +138,9 @@ public class CheckinServiceImpl implements CheckinService {
             records.sort((a, b) -> b.getCreateTime().compareTo(a.getCreateTime()));
 
             Set<Long> spotIds = records.stream().map(CheckinRecord::getSpotId).collect(Collectors.toSet());
-            Map<Long, Spot> spotMap = spotRepository.findAllById(spotIds).stream()
+//            Map<Long, Spot> spotMap = spotRepository.findAllById(spotIds).stream()
+//                    .collect(Collectors.toMap(Spot::getId, s -> s));
+            Map<Long, Spot> spotMap = spotRepository.findAllWithImagesByIds(spotIds).stream()
                     .collect(Collectors.toMap(Spot::getId, s -> s));
 
             List<CheckinRecordDTO> list = records.stream().map(r -> {
