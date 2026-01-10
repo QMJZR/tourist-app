@@ -121,7 +121,7 @@ export default struct FeedsListPage {
     .width('100%')
     .height('100%')
     .backgroundColor('#F5F7FA')
-    .padding({ bottom: 60 })
+    .padding({ bottom: 100 })
   }
 
   // ==================== 顶部导航栏 ====================

@@ -425,8 +425,8 @@ export default struct SpotListPage {
         this.pageInfo = result;
         this.spotItems = result.list;
         console.log('景点数据加载成功，共', result.total, '个景点，当前页', result.list.length, '个');
-        this.pageInfo = mockSpotPageResponse;
-        this.spotItems = mockSpotItems;
+        // this.pageInfo = mockSpotPageResponse;
+        // this.spotItems = mockSpotItems;
       } else {
         // 如果API返回空，使用假数据
         console.log('API返回空数据，使用假数据');

@@ -1,4 +1,6 @@
 import {http} from "@kit.NetworkKit"
+import {BASE_URL} from "./baseurl"
+
 export interface ZoneItem {
   zoneId:number;
   name:string;
@@ -15,7 +17,7 @@ export async function getZones(): Promise<ZoneItem[] | void> {
   let request = http.createHttp();
   try {
     const response = await request.request(
-      "http://10.52.9.10:8080/api/v1/zones",  // 注意：http:// 不是 https://
+      `${BASE_URL}/api/zones`,  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.GET,
         header: {
@@ -170,7 +172,7 @@ export interface SpotRequest {
 export async function getSpots(params?: SpotRequest): Promise<PageResponse<SpotListItem> | void> {
   let request = http.createHttp();
   try {
-    let url = "http://10.52.9.10:8080/api/v1/spots";
+    let url = `${BASE_URL}/api/spots`;
     if (params) {
       const queryParts: string[] = [];
 
@@ -208,6 +210,7 @@ export async function getSpots(params?: SpotRequest): Promise<PageResponse<SpotL
         const str = String(response.result);
         console.log("[DEBUG] getSpots 原始响应:", str.substring(0, 300));
         const responseData: SpotListResponse = JSON.parse(str);
+        console.log("return : ", responseData.data)
         return responseData.data; // 返回 data 字段，即 PageResponse<SpotListItem>
       } else {
         console.warn('getSpots响应结果为空');
@@ -245,7 +248,7 @@ export async function getSpotDetail(id:number): Promise<SpotDetail | void> {
   let request = http.createHttp();
   try {
     const response = await request.request(
-      `http://10.52.9.10:8080/api/v1/spots/${id}`,  // 注意：http:// 不是 https://
+      `${BASE_URL}/api/spots/${id}`,  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.GET,
         header: {

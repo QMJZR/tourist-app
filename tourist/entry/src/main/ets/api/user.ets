@@ -40,7 +40,7 @@ export async function register(RegisterData: RegisterRequest): Promise<string> {
 
   try {
     const response = await request.request(
-      `$\{BASE_URL}/api/auth/register`,  // 注意：http:// 不是 https://
+      `${BASE_URL}/api/auth/register`,  // 注意：http:// 不是 https://
       {
         method: http.RequestMethod.POST,
         header: {
@@ -255,7 +255,7 @@ export async function updateProfile(updateData: UpdateProfileRequest): Promise<U
     console.log('🔍 DEBUG: Token length =', token.length);
 
     const response = await request.request(
-      `$\{BASE_URL}/api/user/profile`,
+      `${BASE_URL}/api/user/profile`,
       {
         method: http.RequestMethod.PUT,
         header: {
