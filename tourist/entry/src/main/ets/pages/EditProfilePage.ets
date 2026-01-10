@@ -575,10 +575,25 @@ export default struct EditProfilePage {
         console.log('修改个人信息成功:', result.msg);
         console.log('更新后的用户数据:', result.data);
 
-        // 延迟后返回
+        // 延迟后使用router.push返回ProfilePage并传递刷新标记
         setTimeout(() => {
           this.isSaving = false;
-          router.back();
+
+          // 使用router.push返回ProfilePage，并清除当前页面
+          const promise: Promise<void> = router.pushUrl({
+            url: 'pages/ProfilePage',
+            params: {
+              needRefresh: true,
+              from: 'edit_profile',
+              timestamp: new Date().getTime()
+            }
+          });
+
+          promise.then((): void => {
+            console.log('成功返回个人中心页面，并传递刷新标记');
+          }).catch((error: Error): void => {
+            console.error('返回个人中心页面失败:', error.message);
+          });
         }, 500);
       } else {
         console.log('修改个人信息失败:', result.msg || '未知错误');
