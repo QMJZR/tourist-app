@@ -246,7 +246,7 @@ export async function getPoints(page: number = 1): Promise<PointsApiResponse | v
     console.log('🔍 DEBUG: Token from storage =', token);
     console.log('🔍 DEBUG: Token length =', token.length);
 
-    const url = `${BASE_URL}/user/points?page=${page}`;
+    const url = `${BASE_URL}/api/user/points?page=${page}`;
     console.log('🔍 DEBUG: 请求URL =', url);
 
     const response = await request.request(
@@ -330,7 +330,7 @@ export async function getGifts(page: number = 1, status: string = "all"): Promis
     console.log('🔍 DEBUG: Token from storage =', token);
     console.log('🔍 DEBUG: Token length =', token.length);
 
-    const url = `${BASE_URL}/user/gifts?page=${page}&status=${status}`;
+    const url = `${BASE_URL}/api/user/gifts?page=${page}&status=${status}`;
     console.log('🔍 DEBUG: 请求URL =', url);
 
     const response = await request.request(
