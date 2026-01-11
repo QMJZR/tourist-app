@@ -179,22 +179,6 @@ export default struct CheckinSpotsPage {
       }
       .width('100%')
       .padding({ left: 15, right: 15 })
-
-      // 附近打卡点提示
-      if (this.userLocation.lat && this.userLocation.lng) {
-        Row() {
-          // Image($r('app.media.ic_location'))
-          //   .width(16)
-          //   .height(16)
-          //   .margin({ right: 5 })
-          Text(`当前位置附近 ${this.getNearbySpotsCount()} 个打卡点`)
-            .fontSize(12)
-            .fontColor('#007AFF')
-        }
-        .width('100%')
-        .padding({ left: 15, right: 15, top: 5 })
-        .justifyContent(FlexAlign.Start)
-      }
     }
     .width('100%')
     .padding({ top: 10, bottom: 10 })
@@ -287,21 +271,12 @@ export default struct CheckinSpotsPage {
 
         // 信息区域
         Column({ space: 6 }) {
-          // 名称和距离
-          Row() {
-            Text(spot.name)
-              .fontSize(16)
-              .fontWeight(FontWeight.Medium)
-              .fontColor('#1A1A1A')
-              .layoutWeight(1)
-
-            if (spot.distance !== undefined) {
-              Text(this.formatDistance(spot.distance))
-                .fontSize(14)
-                .fontColor(spot.distance <= spot.radius ? '#34C759' : '#666666')
-            }
-          }
-          .width('100%')
+          // 名称
+          Text(spot.name)
+            .fontSize(16)
+            .fontWeight(FontWeight.Medium)
+            .fontColor('#1A1A1A')
+            .width('100%')
 
           // 坐标信息
           Row() {
@@ -311,30 +286,19 @@ export default struct CheckinSpotsPage {
           }
           .width('100%')
 
-          // 打卡范围和状态
-          Row() {
-            // 打卡范围
-            Text(`打卡范围: ${spot.radius}米`)
+          // 状态指示器
+          Row({ space: 5 }) {
+            // 状态圆点
+            Column()
+              .width(8)
+              .height(8)
+              .backgroundColor(spot.distance !== undefined && spot.distance <= spot.radius ? '#34C759' : '#FF9500')
+              .borderRadius(4)
+
+            // 状态文本
+            Text(spot.distance !== undefined && spot.distance <= spot.radius ? '可打卡' : '距离过远')
               .fontSize(12)
-              .fontColor('#666666')
-
-            // 状态指示器
-            if (spot.distance !== undefined) {
-              Row({ space: 5 }) {
-                // 距离圆点
-                Column()
-                  .width(8)
-                  .height(8)
-                  .backgroundColor(spot.distance <= spot.radius ? '#34C759' : '#FF9500')
-                  .borderRadius(4)
-
-                // 状态文本
-                Text(spot.distance <= spot.radius ? '可打卡' : '距离过远')
-                  .fontSize(12)
-                  .fontColor(spot.distance <= spot.radius ? '#34C759' : '#FF9500')
-              }
-              .margin({ left: 10 })
-            }
+              .fontColor(spot.distance !== undefined && spot.distance <= spot.radius ? '#34C759' : '#FF9500')
           }
           .width('100%')
         }
@@ -357,21 +321,16 @@ export default struct CheckinSpotsPage {
             this.viewSpotDetail(spot.spotId);
           })
 
-        // 打卡按钮
-        Button(spot.distance && spot.distance <= spot.radius ? '立即打卡' : '查看位置')
+        // 立即打卡按钮
+        Button('立即打卡')
           .fontSize(14)
           .fontColor(Color.White)
-          .backgroundColor(spot.distance && spot.distance <= spot.radius ? '#007AFF' : '#666666')
+          .backgroundColor('#007AFF')
           .height(36)
           .borderRadius(18)
           .layoutWeight(1)
           .margin({ left: 10 })
           .onClick(() => {
-            // if (spot.distance && spot.distance <= spot.radius) {
-            //   this.checkIn(spot.spotId);
-            // } else {
-            //   this.viewOnMap(spot);
-            // }
             this.checkIn(spot.spotId);
           })
       }
@@ -411,21 +370,9 @@ export default struct CheckinSpotsPage {
     ).length;
   }
 
-  // 格式化距离显示
-  private formatDistance(meters: number): string {
-    if (meters < 1000) {
-      return `${meters}米`;
-    } else {
-      return `${(meters / 1000).toFixed(1)}公里`;
-    }
-  }
-
   // 查看点位详情
   private viewSpotDetail(spotId: number) {
-
-    //spotId = spotId // for test
     console.log('查看点位详情:', spotId);
-    // TODO: 跳转到点位详情页面
     router.pushUrl({
       url:"pages/SpotDetailPage",
       params:{spotId}
@@ -435,23 +382,15 @@ export default struct CheckinSpotsPage {
   // 打卡
   private checkIn(spotId: number) {
     console.log('打卡:', spotId);
-    // TODO: 跳转到打卡页面
     router.push({
       url: 'pages/SubmitCheckInPage',
       params: {
         spotId: spotId,
-        spotName: '打卡点名称', // 可以从spot对象获取
-        latitude: 1, // for test
+        spotName: '打卡点名称',
+        latitude: 1,
         longitude: 1
       }
     });
-
-  }
-
-  // 在地图上查看
-  private viewOnMap(spot: CheckinSpot) {
-    console.log('在地图上查看点位:', spot.name, spot.latitude, spot.longitude);
-    // TODO: 跳转到地图页面
   }
 
   // ==================== 生命周期方法 ====================
@@ -468,7 +407,6 @@ export default struct CheckinSpotsPage {
 
   // 获取用户位置
   private getUserLocation() {
-    // TODO: 调用鸿蒙定位API获取当前位置
     console.log('获取用户位置...');
 
     // 模拟位置
@@ -509,6 +447,5 @@ export default struct CheckinSpotsPage {
 
   aboutToDisappear() {
     console.log('打卡点位页面即将消失');
-    // 清理资源
   }
 }

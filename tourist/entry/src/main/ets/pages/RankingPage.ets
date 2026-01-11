@@ -3,18 +3,15 @@
 import { router } from '@kit.ArkUI';
 import { getRankings, RankingsApiResponse, getDailyRankings, getWeeklyRankings, getMonthlyRankings } from '../api/ranking';
 
-// 本地排行榜项接口定义（适配API接口）
+// 排行榜项接口定义（与API接口完全一致）
 interface RankingItemLocal {
   rank: number;          // 排名
   userId: number;       // 用户ID
   username: string;     // 用户名
-  nickname: string;     // 用户昵称（本地扩展字段）
   avatar: string;       // 用户头像
   score: number;       // 综合评分
   checkinCount: number; // 打卡次数
   likeCount: number;    // 点赞数量
-  points: number;       // 积分（本地扩展字段）
-  trend: 'up' | 'down' | 'stable' | 'new'; // 排名趋势（本地扩展字段）
 }
 
 // 时间维度类型（与API一致）
@@ -33,7 +30,7 @@ struct RankingPage {
   @State rankingList: Array<RankingItemLocal> = [];
 
   // 当前时间维度
-  @State currentTimeDimension: TimeDimension = 'weekly'; // 默认本周，与API一致
+  @State currentTimeDimension: TimeDimension = 'weekly';
 
   // 时间维度选项
   private timeOptions: Array<TimeOption> = [
@@ -112,23 +109,14 @@ struct RankingPage {
 
     // 转换排行榜列表数据
     const convertedList: RankingItemLocal[] = response.data.list.map((apiItem, index: number) => {
-      // 生成昵称（API没有提供，根据用户名生成）
-      const nickname = this.generateNickname(apiItem.username);
-
-      // 计算积分（假设每打卡一次得10分，每点赞一次得1分）
-      const points = (apiItem.totalCheckins * 10) + apiItem.totalLikes;
-
       const item: RankingItemLocal = {
         rank: apiItem.rank || index + 1,
         userId: apiItem.userId,
         username: apiItem.username || `用户${apiItem.userId}`,
-        nickname: nickname,
         avatar: apiItem.avatar || this.getDefaultAvatar(apiItem.userId),
         score: apiItem.score || 0,
         checkinCount: apiItem.totalCheckins || 0,
-        likeCount: apiItem.totalLikes || 0,
-        points: points,
-        trend: this.generateTrend(index + 1) // 根据排名生成趋势
+        likeCount: apiItem.totalLikes || 0
       };
       return item;
     });
@@ -136,35 +124,6 @@ struct RankingPage {
     this.rankingList = convertedList;
 
     console.log('数据转换完成，共', this.rankingList.length, '条记录');
-  }
-
-  // 生成用户昵称
-  private generateNickname(username: string): string {
-    // 从预定义的昵称列表中随机选择一个
-    const nicknames = [
-      '旅行达人', '探险家', '摄影大师', '美食猎人', '文化使者',
-      '徒步爱好者', '骑行侠', '背包客', '风景收藏家', '记录者',
-      '城市探索者', '自然爱好者', '历史追寻者', '美食家', '摄影师'
-    ];
-
-    // 使用用户名hash来确保同一个用户总是得到相同的昵称
-    let hash = 0;
-    for (let i = 0; i < username.length; i++) {
-      hash = ((hash << 5) - hash) + username.charCodeAt(i);
-      hash = hash & hash;
-    }
-
-    const index = Math.abs(hash) % nicknames.length;
-    return nicknames[index];
-  }
-
-  // 生成趋势
-  private generateTrend(rank: number): 'up' | 'down' | 'stable' | 'new' {
-    if (rank <= 3) return 'up';
-    if (rank > 7) return 'new';
-
-    const trends: Array<'up' | 'down' | 'stable'> = ['up', 'down', 'stable'];
-    return trends[Math.floor(Math.random() * trends.length)];
   }
 
   // 获取默认头像
@@ -205,23 +164,15 @@ struct RankingPage {
       const checkinCount = baseCheckinCount[i] * timeMultiplier;
       const likeCount = baseLikeCount[i] * timeMultiplier;
       const score = Math.round((checkinCount * 3 + likeCount * 0.1) * 10) / 10;
-      const points = (checkinCount * 10) + likeCount;
-      const nickname = this.generateNickname(`user${1000 + i}`);
-
-      // 生成趋势
-      const trend = this.generateTrend(i + 1);
 
       mockData.push({
         rank: i + 1,
         userId: 1000 + i,
         username: `user${1000 + i}`,
-        nickname: nickname,
         avatar: `https://avatars.githubusercontent.com/u/${1000 + i}?v=4`,
         score: score,
         checkinCount: checkinCount,
-        likeCount: likeCount,
-        points: points,
-        trend: trend
+        likeCount: likeCount
       });
     }
 
@@ -336,38 +287,6 @@ struct RankingPage {
     }
   }
 
-  // 获取排名趋势图标
-  private getTrendIcon(trend: 'up' | 'down' | 'stable' | 'new'): string {
-    switch (trend) {
-      case 'up':
-        return '↑';
-      case 'down':
-        return '↓';
-      case 'stable':
-        return '→';
-      case 'new':
-        return '✨';
-      default:
-        return '';
-    }
-  }
-
-  // 获取排名趋势颜色
-  private getTrendColor(trend: 'up' | 'down' | 'stable' | 'new'): ResourceColor {
-    switch (trend) {
-      case 'up':
-        return '#FF3B30';
-      case 'down':
-        return '#007AFF';
-      case 'stable':
-        return '#666666';
-      case 'new':
-        return '#FF9500';
-      default:
-        return '#666666';
-    }
-  }
-
   // 获取排名徽章颜色
   private getRankBadgeColor(rank: number): string {
     switch (rank) {
@@ -411,20 +330,6 @@ struct RankingPage {
       }
       .width('100%')
       .justifyContent(FlexAlign.Start)
-
-      // 排行榜规则说明
-      Row({ space: 8 }) {
-        Text('📊')
-          .fontSize(14)
-          .fontColor('#666666')
-
-        Text('综合评分 = 打卡次数 + 点赞数 × 0.1')
-          .fontSize(12)
-          .fontColor('#999999')
-          .lineHeight(16)
-      }
-      .width('100%')
-      .padding({ top: 4, bottom: 4 })
     }
     .padding({ left: 16, right: 16, top: 16, bottom: 12 })
     .backgroundColor(Color.White)
@@ -478,26 +383,12 @@ struct RankingPage {
 
           // 用户详情
           Column({ space: 4 }) {
-            Row({ space: 8 }) {
-              Text(item.nickname || item.username || '未知用户')
-                .fontSize(15)
-                .fontWeight(FontWeight.Medium)
-                .fontColor('#333333')
-                .maxLines(1)
-                .textOverflow({ overflow: TextOverflow.Ellipsis })
-                .layoutWeight(1)
-
-              // 趋势图标
-              if (item.trend !== 'stable') {
-                Text(this.getTrendIcon(item.trend))
-                  .fontSize(12)
-                  .fontColor(this.getTrendColor(item.trend))
-              }
-            }
-
-            Text(`@${item.username || 'unknown'}`)
-              .fontSize(11)
-              .fontColor('#999999')
+            Text(item.username || '未知用户')
+              .fontSize(15)
+              .fontWeight(FontWeight.Medium)
+              .fontColor('#333333')
+              .maxLines(1)
+              .textOverflow({ overflow: TextOverflow.Ellipsis })
           }
           .layoutWeight(1)
         }
@@ -597,12 +488,12 @@ struct RankingPage {
               .layoutWeight(1)
 
               Column({ space: 2 }) {
-                Text(this.rankingList[0].points.toString())
+                Text(this.rankingList[0].score.toFixed(1))
                   .fontSize(14)
                   .fontWeight(FontWeight.Medium)
                   .fontColor('#FF9500')
 
-                Text('最高积分')
+                Text('最高评分')
                   .fontSize(10)
                   .fontColor('#999999')
               }

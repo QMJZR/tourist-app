@@ -42,9 +42,6 @@ export default struct SpotDetailPage {
   // 是否展开详情
   @State isDescriptionExpanded: boolean = false;
 
-  // 是否收藏
-  @State isCollected: boolean = false;
-
   // 页面构建
   build() {
     Column() {
@@ -101,15 +98,6 @@ export default struct SpotDetailPage {
         .fontWeight(FontWeight.Medium)
         .fontColor('#1A1A1A')
         .layoutWeight(1)
-
-      // 分享按钮
-      Button('分享')
-        .fontSize(14)
-        .fontColor('#007AFF')
-        .backgroundColor(Color.Transparent)
-        .onClick(() => {
-          this.onShare();
-        })
     }
     .width('100%')
     .height(60)
@@ -172,33 +160,15 @@ export default struct SpotDetailPage {
   @Builder
   buildBasicInfoCard() {
     Column({ space: 12 }) {
-      // 景点名称和收藏按钮
-      Row() {
-        Text(this.spotDetail.name)
-          .fontSize(24)
-          .fontWeight(FontWeight.Bold)
-          .fontColor('#1A1A1A')
-          .layoutWeight(1)
-
-        // 收藏按钮
-        Button(this.isCollected ? '已收藏' : '收藏')
-          .fontSize(14)
-          .fontColor(this.isCollected ? '#FF3B30' : '#666666')
-          .backgroundColor(this.isCollected ? '#FF3B3010' : '#F5F7FA')
-          .height(32)
-          .borderRadius(16)
-          .padding({ left: 12, right: 12 })
-          .onClick(() => {
-            this.onToggleCollect();
-          })
-      }
-      .width('100%')
+      // 景点名称
+      Text(this.spotDetail.name)
+        .fontSize(24)
+        .fontWeight(FontWeight.Bold)
+        .fontColor('#1A1A1A')
+        .width('100%')
 
       // 所属区域
       Row({ space: 5 }) {
-        // Image($r('app.media.ic_zone'))
-        //   .width(16)
-        //   .height(16)
         Text(`区域 ${this.spotDetail.zoneId}`)
           .fontSize(14)
           .fontColor('#666666')
@@ -208,9 +178,6 @@ export default struct SpotDetailPage {
 
       // 开放时间
       Row({ space: 5 }) {
-        // Image($r('app.media.ic_time'))
-        //   .width(16)
-        //   .height(16)
         Text(this.spotDetail.openTime)
           .fontSize(14)
           .fontColor('#666666')
@@ -232,25 +199,11 @@ export default struct SpotDetailPage {
   buildDescriptionCard() {
     Column({ space: 15 }) {
       // 标题
-      Row() {
-        Text('景点介绍')
-          .fontSize(18)
-          .fontWeight(FontWeight.Bold)
-          .fontColor('#1A1A1A')
-
-        if (this.spotDetail.video) {
-          Button('观看视频 →')
-            .fontSize(14)
-            .fontColor('#007AFF')
-            .backgroundColor(Color.Transparent)
-            .onClick(() => {
-              this.onPlayVideo();
-            })
-            .margin({ left: 10 })
-        }
-      }
-      .width('100%')
-      .justifyContent(FlexAlign.SpaceBetween)
+      Text('景点介绍')
+        .fontSize(18)
+        .fontWeight(FontWeight.Bold)
+        .fontColor('#1A1A1A')
+        .width('100%')
 
       // 描述内容
       Text(this.spotDetail.description)
@@ -337,22 +290,11 @@ export default struct SpotDetailPage {
   buildLocationCard() {
     Column({ space: 12 }) {
       // 标题
-      Row() {
-        Text('地理位置')
-          .fontSize(18)
-          .fontWeight(FontWeight.Bold)
-          .fontColor('#1A1A1A')
-          .layoutWeight(1)
-
-        Button('查看地图 →')
-          .fontSize(14)
-          .fontColor('#007AFF')
-          .backgroundColor(Color.Transparent)
-          .onClick(() => {
-            this.onViewMap();
-          })
-      }
-      .width('100%')
+      Text('地理位置')
+        .fontSize(18)
+        .fontWeight(FontWeight.Bold)
+        .fontColor('#1A1A1A')
+        .width('100%')
 
       // 坐标信息
       Column({ space: 8 }) {
@@ -394,81 +336,39 @@ export default struct SpotDetailPage {
   @Builder
   buildBottomActionBar() {
     Column() {
-      // 按钮容器
-      Row({ space: 10 }) {
-        // 导航按钮
-        Button('导航前往')
-          .fontSize(16)
-          .fontColor('#007AFF')
-          .backgroundColor('#007AFF10')
-          .height(50)
-          .borderRadius(25)
-          .layoutWeight(1)
-          .onClick(() => {
-            this.onNavigate();
-          })
-
-        // 打卡按钮
-        Button('立即打卡')
-          .fontSize(16)
-          .fontColor(Color.White)
-          .backgroundColor('#007AFF')
-          .height(50)
-          .borderRadius(25)
-          .layoutWeight(1)
-          .onClick(() => {
-            this.onCheckIn();
-          })
-      }
-      .width('100%')
-      .padding({ left: 15, right: 15 })
+      // 打卡按钮
+      Button('立即打卡')
+        .fontSize(18)
+        .fontColor(Color.White)
+        .backgroundColor('#007AFF')
+        .height(56)
+        .borderRadius(28)
+        .width('90%')
+        .onClick(() => {
+          this.onCheckIn();
+        })
     }
     .width('100%')
     .backgroundColor(Color.White)
     .shadow({ radius: 10, color: '#0000001A', offsetY: -3 })
-    .padding({ top: 10, bottom: 10 })
+    .padding({ top: 15, bottom: 30 })
+    .justifyContent(FlexAlign.Center)
+    .alignItems(HorizontalAlign.Center)
   }
 
   // ==================== 交互方法 ====================
 
-  // 分享
-  private onShare() {
-    console.log('分享景点:', this.spotDetail.name);
-    // TODO: 实现分享功能
-  }
-
-  // 切换收藏
-  private onToggleCollect() {
-    this.isCollected = !this.isCollected;
-    console.log(this.isCollected ? '已收藏' : '取消收藏', this.spotDetail.name);
-    // TODO: 调用收藏API
-  }
-
-  // 播放视频
-  private onPlayVideo() {
-    console.log('播放视频:', this.spotDetail.video);
-    // TODO: 播放视频
-  }
-
-  // 查看地图
-  private onViewMap() {
-    console.log('查看地图，坐标:', this.spotDetail.latitude, this.spotDetail.longitude);
-    // TODO: 跳转到地图页面
-  }
-
-  // 导航前往
-  private onNavigate() {
-    console.log('导航前往:', this.spotDetail.name);
-    // TODO: 打开地图导航
-  }
-
   // 立即打卡
   private onCheckIn() {
     console.log('打卡景点:', this.spotDetail.name);
-    // TODO: 跳转到打卡页面
+    // 跳转到打卡页面，传递景点ID
     router.pushUrl({
-      url:"pages/CheckInSpotsPage"
-    })
+      url: "pages/CheckInSpotsPage",
+      params: {
+        spotId: this.spotDetail.spotId,
+        spotName: this.spotDetail.name
+      }
+    });
   }
 
   // ==================== 生命周期方法 ====================

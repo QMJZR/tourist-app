@@ -91,13 +91,13 @@ public class CheckinServiceImpl implements CheckinService {
                 req.getLatitude(), req.getLongitude(),
                 spot.getLatitude(), spot.getLongitude()
         );
-        if (distance > spot.getRadius()) {
-            throw new HarmonyException("未在打卡范围内，请靠近后重试", 3101);
-        }
+//        if (distance > spot.getRadius()) {
+//            throw new HarmonyException("未在打卡范围内，请靠近后重试", 3101);
+//        }
 
-        if (req.getImage() != null && !req.getImage().startsWith("data:image")) {
-            throw new HarmonyException("图片格式不正确", 3103);
-        }
+//        if (req.getImage() != null && !req.getImage().startsWith("data:image")) {
+//            throw new HarmonyException("图片格式不正确", 3103);
+//        }
 
         CheckinRecord record = new CheckinRecord();
         record.setUserId(userId);

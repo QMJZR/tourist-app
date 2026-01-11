@@ -266,19 +266,12 @@ export default struct SpotListPage {
 
         // 信息区域
         Column({ space: 8 }) {
-          // 名称和距离
-          Row() {
-            Text(spot.name)
-              .fontSize(16)
-              .fontWeight(FontWeight.Medium)
-              .fontColor('#1A1A1A')
-              .layoutWeight(1)
-
-            Text(this.formatDistance(spot.distance))
-              .fontSize(14)
-              .fontColor('#007AFF')
-          }
-          .width('100%')
+          // 名称
+          Text(spot.name)
+            .fontSize(16)
+            .fontWeight(FontWeight.Medium)
+            .fontColor('#1A1A1A')
+            .width('100%')
 
           // 简介
           Text(spot.summary)
@@ -379,7 +372,6 @@ export default struct SpotListPage {
     .margin({ top: 2 })
   }
 
-
   // ==================== 交互方法 ====================
 
   // 查看景点详情
@@ -389,15 +381,6 @@ export default struct SpotListPage {
       url: 'pages/SpotDetailPage',
       params: { spotId }
     });
-  }
-
-  // 格式化距离
-  private formatDistance(meters: number): string {
-    if (meters < 1000) {
-      return `${meters}米`;
-    } else {
-      return `${(meters / 1000).toFixed(1)}公里`;
-    }
   }
 
   // ==================== 生命周期方法 ====================
@@ -425,8 +408,6 @@ export default struct SpotListPage {
         this.pageInfo = result;
         this.spotItems = result.list;
         console.log('景点数据加载成功，共', result.total, '个景点，当前页', result.list.length, '个');
-        // this.pageInfo = mockSpotPageResponse;
-        // this.spotItems = mockSpotItems;
       } else {
         // 如果API返回空，使用假数据
         console.log('API返回空数据，使用假数据');
