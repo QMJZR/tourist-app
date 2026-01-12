@@ -40,4 +40,4 @@ server:
       min-spare: 20
     accept-count: 1000
 deepseek:
-  api-key: sk-289344634a474c6d9b1ea4bff9261723
+  api-key: 2333

@@ -3,9 +3,13 @@ package com.group9.harmonyapp.service.serviceImpl;
 import com.group9.harmonyapp.dto.*;
 import com.group9.harmonyapp.exception.HarmonyException;
 import com.group9.harmonyapp.po.CheckinRecord;
+import com.group9.harmonyapp.po.PointRecord;
 import com.group9.harmonyapp.po.Spot;
+import com.group9.harmonyapp.po.User;
 import com.group9.harmonyapp.repository.CheckinRecordRepository;
+import com.group9.harmonyapp.repository.PointRecordRepository;
 import com.group9.harmonyapp.repository.SpotRepository;
+import com.group9.harmonyapp.repository.UserRepository;
 import com.group9.harmonyapp.service.CheckinService;
 import com.group9.harmonyapp.util.GeoUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ public class CheckinServiceImpl implements CheckinService {
 
     private final SpotRepository spotRepository;
     private final CheckinRecordRepository checkinRecordRepository;
+    private final PointRecordRepository pointRecordRepository;
+    private final UserRepository userRepository;
 
     /**
      * 缓存景点列表
@@ -113,6 +119,28 @@ public class CheckinServiceImpl implements CheckinService {
         dto.setPoints(100);
         dto.setCheckinTime(record.getCreateTime());
         dto.setMessage("恭喜完成打卡！获得 100 积分");
+    //  point record!
+        PointRecord pointRecord = new PointRecord();
+        pointRecord.setType("earn");
+        pointRecord.setSource("submit");
+        pointRecord.setPoints(100);
+        pointRecord.setUserId(userId);
+        pointRecord.setCreatedAt(LocalDateTime.now());
+        pointRecordRepository.save(pointRecord);
+        // user point
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            int oldPoints = user.getPoints();
+            user.setPoints(oldPoints + 100);
+            System.out.println("成功：用户 " + userId + " 积分从 " + oldPoints + " 增加到 " + user.getPoints());
+
+            // 可选：保存更改
+            userRepository.save(user);
+        } else {
+            System.out.println("失败：找不到用户 ID: " + userId);
+        }
 
         return dto;
     }
