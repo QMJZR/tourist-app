@@ -76,8 +76,8 @@ export default struct ProfilePage {
 
   // 功能列表
   @State functionList: Array<FunctionItem> = [
-    { id: 'checkin', icon: '📍', title: '打卡记录', subtitle: '查看您的打卡历史', showArrow: true, route: 'checkin_detail' },
-    { id: 'points', icon: '⭐', title: '积分', subtitle: '当前积分：0', showArrow: true, route: 'points_detail' },
+    { id: 'checkin', icon: '📍', title: '打卡记录', showArrow: true, route: 'checkin_detail' },
+    { id: 'points', icon: '⭐', title: '积分', showArrow: true, route: 'points_detail' },
     { id: 'gifts', icon: '🎁', title: '我的礼品', showArrow: true, route: 'gifts_detail' },
     { id: 'edit', icon: '✏️', title: '修改个人信息', showArrow: true, route: 'edit_profile' }
   ];
@@ -398,27 +398,27 @@ export default struct ProfilePage {
             .width('100%')
 
           // 动态更新副标题
-          if (item.subtitle && item.id !== 'gifts') {
-            if (item.id === 'points') {
-              Text(`当前积分：${this.userPoints}`)
-                .fontSize(13)
-                .fontColor('#666666')
-                .textAlign(TextAlign.Start)
-                .width('100%')
-            } else if (item.id === 'checkin') {
-              Text(`打卡次数：${this.userCheckinCount}`)
-                .fontSize(13)
-                .fontColor('#666666')
-                .textAlign(TextAlign.Start)
-                .width('100%')
-            } else {
-              Text(item.subtitle)
-                .fontSize(13)
-                .fontColor('#666666')
-                .textAlign(TextAlign.Start)
-                .width('100%')
-            }
-          }
+          // if (item.subtitle && item.id !== 'gifts') {
+          //   if (item.id === 'points') {
+          //     Text(`当前积分：${this.userPoints}`)
+          //       .fontSize(13)
+          //       .fontColor('#666666')
+          //       .textAlign(TextAlign.Start)
+          //       .width('100%')
+          //   } else if (item.id === 'checkin') {
+          //     Text(`打卡次数：${this.userCheckinCount}`)
+          //       .fontSize(13)
+          //       .fontColor('#666666')
+          //       .textAlign(TextAlign.Start)
+          //       .width('100%')
+          //   } else {
+          //     Text(item.subtitle)
+          //       .fontSize(13)
+          //       .fontColor('#666666')
+          //       .textAlign(TextAlign.Start)
+          //       .width('100%')
+          //   }
+          // }
         }
         .layoutWeight(1)
 

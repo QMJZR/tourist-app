@@ -24,14 +24,14 @@ export default struct DiscoverPage {
       showArrow: true,
       route: 'pages/RankPage'
     },
-    {
-      id: 'feeds',
-      icon: '📝',
-      title: '动态',
-      subtitle: '浏览与分享旅行时刻',
-      showArrow: true,
-      route: 'pages/FeedListPage'
-    }
+    // {
+    //   id: 'feeds',
+    //   icon: '📝',
+    //   title: '动态',
+    //   subtitle: '浏览与分享旅行时刻',
+    //   showArrow: true,
+    //   route: 'pages/FeedListPage'
+    // }
   ];
 
   // 其他发现功能（可后续扩展）
