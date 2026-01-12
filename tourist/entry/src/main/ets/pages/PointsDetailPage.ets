@@ -1,7 +1,7 @@
 // entry/src/main/ets/pages/PointsDetailPage.ets
 
 import { router } from '@kit.ArkUI';
-import { getPoints } from '../api/profile';
+import { getPoints, getTotalPoints } from '../api/profile';
 
 // 积分记录类型定义
 interface PointsRecordLocal {
@@ -43,9 +43,13 @@ struct PointsDetailPage {
 
     try {
       const result = await getPoints(this.currentPage);
+      // for our total points!
+      const res = await getTotalPoints() as number;
 
       if (result && result.code === 200 && result.data) {
-        this.totalPoints = result.data.totalPoints || 0;
+        // this.totalPoints = result.data.totalPoints || 0;
+        this.totalPoints = res;
+
         this.pointsRecords = result.data.list || [];
 
         // 计算总页数

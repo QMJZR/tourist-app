@@ -14,4 +14,5 @@ public interface SpotService {
     PageResponseDTO<SpotListItemDTO> list(Long zoneId, String type, String keyword, int page, int pageSize);
     SpotDetailResponse detail(Long id);
     List<Spot> findNearby(Double lat, Double lng, Integer radius);
+    List<Spot> findAll();
 }

@@ -27,6 +27,8 @@ public class AssistantServiceImpl implements AssistantService {
         private final SpotRepository spotRepository;
         public AssistantResponseDTO handleAsk(AssistantRequestDTO req) {
             try{
+                System.out.println("🔍 收到请求: " + JSON.toJSONString(req));
+                System.out.println("🔍 问题内容: " + req.getQuestion());
             // 参数校验
             if (req.getQuestion() == null || req.getQuestion().isBlank()) {
                 throw new RuntimeException("问题不能为空");
@@ -41,19 +43,23 @@ public class AssistantServiceImpl implements AssistantService {
             List<Spot> list = new ArrayList<>();
 
             if (lat != null && lng != null) {
-                list = spotService.findNearby(lat, lng, 1000); // 查 1km 内
+//                list = spotService.findNearby(lat, lng, 1000); // 查 1km 内
+
+                System.out.println("all spots" + JSON.toJSONString(list));
             }
+            list = spotService.findAll();  // try all
 
             // 转为你的 RecommendationDTO
             List<RecommendationDTO> recList = new ArrayList<>();
             for (Spot r : list) {
                 RecommendationDTO rec = new RecommendationDTO();
-                rec.setType("restaurant");
+                rec.setType("");
                 rec.setId(r.getId());
                 rec.setName(r.getName());
                 rec.setLatitude(r.getLatitude());
                 rec.setLongitude(r.getLongitude());
-                rec.setDistance(GeoUtil.distance(lat,lng,r.getLatitude(),r.getLongitude()));
+//                rec.setDistance(GeoUtil.distance(lat,lng,r.getLatitude(),r.getLongitude()));
+                rec.setDistance(100);
                 recList.add(rec);
             }
 
@@ -66,9 +72,13 @@ public class AssistantServiceImpl implements AssistantService {
 
 // 从 ids 中查推荐的数据
             List<RecommendationDTO> recs = spotRepository.findByIdIn(result.getIds()).stream().
-                    map((e)->{if(lat!=null && lng!=null){
-                        return e.toRecommendationDTO(GeoUtil.distance(lat,lng,e.getLatitude(),e.getLongitude()));
-                    }else return null;})
+//                    map((e)->{if(lat!=null && lng!=null){
+//                        return e.toRecommendationDTO(GeoUtil.distance(lat,lng,e.getLatitude(),e.getLongitude()));
+//                    }else return null;})
+                    map((e)->{
+                return e.toRecommendationDTO(100);
+            })
+
                 .collect(Collectors.toList());
 
 // 返回
@@ -79,6 +89,8 @@ public class AssistantServiceImpl implements AssistantService {
             return response;}
 
             catch (Exception e){
+                System.err.println("❌ 智能助手处理异常: " + e.getMessage());
+                e.printStackTrace();  // 打印完整堆栈
                 throw new HarmonyException("智能助手暂时无法响应，请稍后再试",3402);
             }
         

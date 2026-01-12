@@ -90,4 +90,8 @@ public class SpotServiceImpl implements SpotService {
                 .filter(e -> GeoUtil.distance(e.getLatitude(), e.getLongitude(), lat, lng) <= radius)
                 .collect(Collectors.toList());
     }
+
+    public List<Spot> findAll(){
+        return spotRepository.findAll();
+    }
 }

@@ -49,6 +49,7 @@ struct LoginPage {
         .borderRadius(25)
         .enabled(!!this.username && !!this.password)
         .onClick(() => {
+          console.log("you clicked login!")
           this.handleLogin();
         })
         .margin({ top: 20 })

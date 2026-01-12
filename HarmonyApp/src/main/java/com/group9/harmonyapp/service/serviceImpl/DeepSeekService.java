@@ -29,6 +29,8 @@ public class DeepSeekService {
 
     public LLMResult ask(String question, String backendContextJson) {
         if(question == null) throw  new HarmonyException("问题不能为空",3401);
+        System.out.println("🔍 调用DeepSeek，问题: " + question);
+        System.out.println("🔍 上下文数据: " + backendContextJson);
 
         Map<String, Object> request = new HashMap<>();
         request.put("model", "deepseek-chat");

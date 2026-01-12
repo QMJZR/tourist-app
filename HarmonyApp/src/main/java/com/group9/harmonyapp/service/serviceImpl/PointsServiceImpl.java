@@ -55,4 +55,11 @@ public class PointsServiceImpl implements PointsService {
             throw new HarmonyException("获取积分记录失败", 3702);
         }
     }
+
+    public Integer getTotalPoints(Long userId){
+        User user = userRepository.findById(userId).orElse(null);
+        Integer totalPoints = 0;
+        if (user != null && user.getPoints() != null) totalPoints = user.getPoints();
+        return totalPoints;
+    }
 }

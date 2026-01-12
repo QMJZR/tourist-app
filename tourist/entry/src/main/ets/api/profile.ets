@@ -310,6 +310,85 @@ export async function getPoints(page: number = 1): Promise<PointsApiResponse | v
   }
 }
 
+// total points
+
+export async function getTotalPoints(): Promise<number | void> {
+  let request = http.createHttp();
+  try {
+    // 需要先从存储获取token
+    const token = await StorageUtil.getToken();
+    if (!token) {
+      console.warn('未找到token，请先登录');
+      return;
+    }
+
+    console.log('🔍 DEBUG: Token from storage =', token);
+    console.log('🔍 DEBUG: Token length =', token.length);
+    const userId =  await StorageUtil.getUserId();
+
+    const url = `${BASE_URL}/api/user/points/${userId}`;
+    console.log('🔍 DEBUG: 请求URL =', url);
+
+    const response = await request.request(
+      url,
+      {
+        method: http.RequestMethod.GET,
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'token': token  // 双token头
+        }
+      }
+    );
+
+    console.log('🔍 DEBUG: 总积分响应状态 =', response.responseCode);
+
+    if (response.result) {
+      const resultStr = String(response.result);
+      console.log('🔍 DEBUG: 响应Body =', resultStr);
+    }
+
+    if (response.responseCode === 200) {
+      if (response.result) {
+        const resultStr = String(response.result);
+        console.log('总积分响应:', resultStr);
+
+        try {
+          const res: number = JSON.parse(resultStr);
+          return res;
+          // if (res.code === 200 && res.data) {
+          //   console.log('获取总积分成功');
+          //   return res;
+          // } else {
+          //   console.log('获取总积分失败:', res.msg);
+          //   return res;
+          // }
+        } catch (parseError) {
+          console.error('总积分响应失败:', parseError);
+        }
+      } else {
+        console.warn('响应结果为空');
+      }
+    } else {
+      console.log("获取总积分失败，状态码:", response.responseCode);
+
+      if (response.result) {
+        const errorResult = String(response.result);
+        console.log("错误响应内容:", errorResult);
+        try {
+          const errorJson: GiftsApiResponse = JSON.parse(errorResult);
+          console.log("错误JSON:", errorJson);
+        } catch (e) {
+          console.log("错误内容不是JSON格式");
+        }
+      }
+    }
+  } catch (error) {
+    console.error('获取礼品列表异常:', error);
+  } finally {
+    request.destroy();
+  }
+}
 /**
  * 获取用户礼品列表
  * @param page 页码，默认1

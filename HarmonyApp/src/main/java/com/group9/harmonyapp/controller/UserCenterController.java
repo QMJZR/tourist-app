@@ -49,6 +49,15 @@ public class UserCenterController {
         return Response.buildSuccess(data);
     }
 
+    @GetMapping("/points/{id}")
+    public Integer getTotalPoints(@PathVariable Long id, @RequestHeader("token") String auth){
+
+        Long userId = tokenUtil.getUser(auth).getId();
+        Integer TotalPoints = pointsService.getTotalPoints(userId);
+        return TotalPoints;
+    }
+
+
     @GetMapping("/gifts")
     public Response<PageResponseDTO<com.group9.harmonyapp.dto.GiftDTO>> getGifts(
             @RequestParam(defaultValue = "1") int page,

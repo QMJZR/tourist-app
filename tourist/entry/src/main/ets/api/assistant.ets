@@ -72,7 +72,7 @@ export async function askAssistant(askData: AskAssistantRequest): Promise<AskAss
     console.log('🔍 DEBUG: Token length =', token.length);
 
     const response = await request.request(
-      `${BASE_URL}/assistant/ask`,
+      `${BASE_URL}/api/assistant/ask`,
       {
         method: http.RequestMethod.POST,
         header: {
