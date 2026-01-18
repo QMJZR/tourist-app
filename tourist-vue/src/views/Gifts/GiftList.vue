@@ -47,7 +47,6 @@
         <template #default="{ row }">
           <el-button type="primary" size="small" @click="openDialog(row)">编辑</el-button>
           <el-button type="danger" size="small" @click="handleDeleteGift(row.giftId)">删除</el-button>
-          <el-button type="info" size="small" @click="viewRedeemStats(row)">查看兑换统计</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -243,11 +242,7 @@ const handleDeleteGift = async (giftId: number) => {
   }
 }
 
-// 查看兑换统计
-const viewRedeemStats = (gift: Gift) => {
-  selectedGift.value = gift
-  redeemStatsVisible.value = true
-}
+
 
 // 组件挂载时获取礼品列表
 onMounted(fetchGifts)

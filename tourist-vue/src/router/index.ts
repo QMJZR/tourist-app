@@ -5,10 +5,9 @@ import SpotList from '@/views/Spots/SpotList.vue'
 import CheckPoints from '@/views/Checkpoints/CheckPoints.vue'
 import PointRules from "@/views/Points/PointRules.vue";
 import Register from "@/views/Register.vue";
-import UserPointLogs from "@/views/Points/UserPointLogs.vue";
 import GiftList from "@/views/Gifts/GiftList.vue";
 import UserList from "@/views/Users/UserList.vue";
-import MerchantStats from "@/views/MerchantStats.vue";
+
 import { useUserStore } from '@/store/user';
 import { createPinia } from 'pinia';
 const routes: Array<RouteRecordRaw> = [
@@ -23,10 +22,8 @@ const routes: Array<RouteRecordRaw> = [
             { path: 'spots', name: 'Spots', component: SpotList, meta: { requiresAuth: true } },
             { path: 'checkpoints', name: 'CheckPoints', component: CheckPoints, meta: { requiresAuth: true } },
             { path: 'points', name: 'PointRules', component: PointRules, meta: { requiresAuth: true } },
-            { path: 'userPointlogs', name: 'UserPointLogs', component: UserPointLogs, meta: { requiresAuth: true } },
             { path: 'gifts', name: 'Gifts', component: GiftList, meta: { requiresAuth: true } },
             { path: 'users', name: 'Users', component: UserList, meta: { requiresAuth: true } },
-            { path: 'merchant-stats', name: 'MerchantStats', component: MerchantStats, meta: { requiresAuth: true } },
         ]
     },
     { path: '/:pathMatch(.*)*', redirect: '/' }

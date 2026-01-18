@@ -9,7 +9,7 @@
       <el-table-column prop="spotId" label="景点ID" width="120" />
       <el-table-column prop="latitude" label="纬度" width="120" />
       <el-table-column prop="longitude" label="经度" width="120" />
-      <el-table-column prop="openTime" label="有效打卡点半径" width="120" />
+      <el-table-column prop="radius" label="有效打卡点半径" width="120" />
       <el-table-column label="操作" width="180">
         <template #default="scope">
           <el-button type="primary" size="small" @click="openDialog(scope.row)">编辑</el-button>

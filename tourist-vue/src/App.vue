@@ -35,12 +35,10 @@
           <el-sub-menu index="/points">
             <template #title>积分管理</template>
             <el-menu-item index="/points">积分规则</el-menu-item>
-            <el-menu-item index="/userPointlogs">用户积分流水</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="/gifts">
             <template #title>礼品管理</template>
             <el-menu-item index="/gifts">礼品列表</el-menu-item>
-            <el-menu-item index="/merchant-stats">核销统计</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="/users">
             <template #title>用户管理</template>
